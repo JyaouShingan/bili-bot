@@ -1,3 +1,13 @@
+# MacOS
+.DS_Store
+
+# Webstorm
+.idea
+
+# Testing files
+*.mp3
+tmp
+
 # Logs
 logs
 *.log
