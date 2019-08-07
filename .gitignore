@@ -8,6 +8,9 @@
 *.mp3
 tmp
 
+# Typescript build
+built/
+
 # Logs
 logs
 *.log

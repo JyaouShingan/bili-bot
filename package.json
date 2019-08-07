@@ -10,7 +10,14 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@types/fluent-ffmpeg": "^2.1.10",
+    "@types/node": "^12.7.0",
+    "@types/youtube-dl": "^1.12.2",
+    "discord.js": "github:discordjs/discord.js",
     "fluent-ffmpeg": "^2.1.2",
+    "node-opus": "^0.3.2",
+    "typescript": "^3.5.3",
+    "winston": "^3.2.1",
     "youtube-dl": "^2.0.0"
   }
 }
