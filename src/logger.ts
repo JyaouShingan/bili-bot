@@ -16,3 +16,5 @@ export function getLogger(moduleName: string) {
         ]
     });
 }
+
+export { Logger } from 'winston';

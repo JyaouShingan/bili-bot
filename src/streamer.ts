@@ -1,9 +1,7 @@
-import { PassThrough } from 'stream';
-import * as ffmpeg from 'fluent-ffmpeg';
+import {PassThrough} from 'stream';
 import * as ytdl from 'youtube-dl';
-import { BilibiliSong } from "./bilibili-song";
-import { getLogger } from "./logger";
-import { Logger } from "winston";
+import {BilibiliSong} from "./bilibili-song";
+import {Logger, getLogger} from "./logger";
 import * as Ffmpeg from "fluent-ffmpeg";
 
 class PassStream extends PassThrough {
@@ -20,10 +18,12 @@ export class Streamer {
 
 
     constructor(public song: BilibiliSong) {
+        const bufferSize = 10 * 1024 * 1024; // 10 mb
+
         this.logger = getLogger("Streamer");
-        this.ffmpegCommand = ffmpeg();
-        this.output = new PassThrough();
-        this.transferStream = new PassStream();
+        this.ffmpegCommand = Ffmpeg();
+        this.output = new PassThrough({highWaterMark: bufferSize});
+        this.transferStream = new PassStream({highWaterMark: bufferSize});
     }
 
     start() {

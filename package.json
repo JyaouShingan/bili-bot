@@ -4,7 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "compile": "node_modules/typescript/bin/tsc",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "npm run compile && node built/app.js"
   },
   "keywords": [],
   "author": "",

@@ -8,6 +8,9 @@
 *.mp3
 tmp
 
+# Configuration file
+botconfig.json
+
 # Typescript build
 built/
 

@@ -1,6 +1,5 @@
-import { Client, Message } from 'discord.js';
-import { getLogger } from "./logger";
-import { Logger } from "winston";
+import {Client, Message} from 'discord.js';
+import {Logger, getLogger} from "./logger";
 import {Streamer} from "./streamer";
 import * as ytdl from 'youtube-dl';
 import {BilibiliSong} from "./bilibili-song";
@@ -20,7 +19,6 @@ export class DiscordBot {
         this.client.login(this.token);
         this.client.on('ready', () => { this.clientReady() });
         this.client.on('message', (msg) => { this.handleMessage(msg) });
-
     }
 
     clientReady() {
@@ -54,9 +52,9 @@ export class DiscordBot {
             } else {
                 let song = new BilibiliSong(
                     url,
-                    info.title,
-                    info.uploader,
-                    info.thumbnails.shift()['url'],
+                    info['title'],
+                    info['uploader'],
+                    info['thumbnail'],
                     info._duration_raw
                 );
                 callback(song);
