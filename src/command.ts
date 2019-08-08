@@ -13,7 +13,11 @@ export const CommandType = {
     pause: 'pause',
     resume: 'resume',
     stop: 'stop',
-    help: 'help'
+    help: 'help',
+    next: 'next',
+    shuffle: 'shuffle',
+    clear: 'clear',
+    leave: 'leave',
 };
 
 export class CommandEngine extends EventEmitter {
@@ -39,6 +43,20 @@ export class CommandEngine extends EventEmitter {
             case CommandType.resume:
                 this.processResume(msg);
                 break;
+            case CommandType.next:
+                this.processNext(msg);
+                break;
+            case CommandType.stop:
+                this.processStop(msg);
+                break;
+            case CommandType.shuffle:
+                this.processShuffle(msg);
+                break;
+            case CommandType.clear:
+                this.processClear(msg);
+                break;
+            case CommandType.leave:
+                this.processLeave(msg);
             default:
                 break;
         }
@@ -74,6 +92,26 @@ export class CommandEngine extends EventEmitter {
 
     processResume(msg: Message) {
         this.emit(CommandType.resume, msg);
+    }
+
+    processNext(msg: Message) {
+        this.emit(CommandType.next, msg);
+    }
+
+    processStop(msg: Message) {
+        this.emit(CommandType.stop, msg);
+    }
+
+    processClear(msg: Message) {
+        this.emit(CommandType.clear, msg);
+    }
+
+    processShuffle(msg: Message) {
+        this.emit(CommandType.shuffle, msg);
+    }
+
+    processLeave(msg: Message) {
+        this.emit(CommandType.leave, msg);
     }
 
 }
