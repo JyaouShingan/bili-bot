@@ -6,15 +6,17 @@
   "scripts": {
     "compile": "node_modules/typescript/bin/tsc",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "npm run compile && node built/app.js"
+    "start": "npm run compile && node built/src/app.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@types/bluebird": "^3.5.27",
     "@types/fluent-ffmpeg": "^2.1.10",
     "@types/node": "^12.7.0",
     "@types/youtube-dl": "^1.12.2",
+    "bluebird": "^3.5.5",
     "discord.js": "github:discordjs/discord.js",
     "fluent-ffmpeg": "^2.1.2",
     "node-opus": "^0.3.2",

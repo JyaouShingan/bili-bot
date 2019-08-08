@@ -1,18 +1,19 @@
 import {Client, Message} from 'discord.js';
 import {Logger, getLogger} from "./logger";
-import {Streamer} from "./streamer";
-import * as ytdl from 'youtube-dl';
-import {BilibiliSong} from "./bilibili-song";
+import {GuildManager} from "./guild";
+
+
 
 export class DiscordBot {
     logger: Logger;
     client: Client;
+    guilds: Map<string, GuildManager>;
 
-    /** @param {string} token */
     constructor(public token: string) {
         this.logger = getLogger('DiscordBot');
         this.client = new Client();
         this.token = token;
+        this.guilds = new Map<string, GuildManager>();
     }
 
     run() {
@@ -26,39 +27,11 @@ export class DiscordBot {
     }
 
     handleMessage(msg: Message) {
-        this.logger.info(`Message: ${msg}`);
-        if (msg.author.username === "JyaouShingan") {
-            this.generateSong(msg.content, (song) => {
-                if (!song) return;
-                let streamer = new Streamer(song);
-                streamer.start();
-                if (msg.member.voice.channel) {
-                    msg.member.voice.channel.join().then((connection) => {
-                        const dispatcher = connection.play(streamer.getOutputStream());
-                        dispatcher.setVolume(0.1);
-                        dispatcher.on('finish', () => {
-                            dispatcher.destroy();
-                        });
-                    });
-                }
-            });
+        if (!msg.guild) return;
+        let guildId = msg.guild.id;
+        if (!this.guilds.has(guildId)) {
+            this.guilds.set(guildId, new GuildManager(guildId));
         }
-    }
-
-    generateSong(url: string, callback: (song: BilibiliSong) => void) {
-        ytdl.getInfo(url, (err, info) => {
-            if (err) {
-                this.logger.error(`Query Info error: ${err}`);
-            } else {
-                let song = new BilibiliSong(
-                    url,
-                    info['title'],
-                    info['uploader'],
-                    info['thumbnail'],
-                    info._duration_raw
-                );
-                callback(song);
-            }
-        });
+        this.guilds.get(guildId).processMessage(msg);
     }
 }

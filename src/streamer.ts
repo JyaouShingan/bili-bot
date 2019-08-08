@@ -1,4 +1,4 @@
-import {PassThrough} from 'stream';
+import {PassThrough, Readable} from 'stream';
 import * as ytdl from 'youtube-dl';
 import {BilibiliSong} from "./bilibili-song";
 import {Logger, getLogger} from "./logger";
@@ -26,7 +26,7 @@ export class Streamer {
         this.transferStream = new PassStream({highWaterMark: bufferSize});
     }
 
-    start() {
+    start(): Readable {
         let video = ytdl(this.song.url, ['--format=best'], null);
         video.on('info', (info) => {
             this.logger.info(`Start downloading video: ${this.song.title}`);
@@ -45,9 +45,10 @@ export class Streamer {
                 this.logger.error(`FFmpeg error: ${err}`);
             })
             .pipe(this.output);
+        return this.output;
     }
 
-    getOutputStream() {
+    getOutputStream(): Readable {
         return this.output;
     }
 }

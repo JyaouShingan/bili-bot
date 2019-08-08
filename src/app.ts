@@ -1,4 +1,4 @@
-import { DiscordBot } from "./discord-bot";
+import {DiscordBot} from "./discord-bot";
 import * as config from "../botconfig.json";
 import {getLogger} from "./logger";
 
