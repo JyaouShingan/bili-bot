@@ -3,7 +3,11 @@ import {BilibiliSong} from "./bilibili-song";
 import {Message, MessageEmbed, StreamDispatcher, TextChannel, VoiceChannel, VoiceConnection} from "discord.js";
 import {CommandType, CommandEngine} from "./command";
 import * as youtubedl from "youtube-dl";
+import * as Promise from "bluebird";
 import { Streamer } from "./streamer";
+import * as fs from 'fs';
+
+let getInfo = Promise.promisify(youtubedl.getInfo);
 
 export class GuildManager {
     logger: Logger;
@@ -13,6 +17,7 @@ export class GuildManager {
     activeTextChannel: TextChannel;
     activeDispatcher: StreamDispatcher;
     playlist: Array<BilibiliSong>;
+    currentSong?: BilibiliSong;
     commandPrefix: string;
     commandEngine: CommandEngine;
 
@@ -21,6 +26,7 @@ export class GuildManager {
         this.id = id;
         this.isPlaying = false;
         this.playlist = [];
+        this.currentSong = null;
         this.commandPrefix = prefix;
         this.commandEngine = new CommandEngine();
         this.setupCommandEnginee();
@@ -53,6 +59,12 @@ export class GuildManager {
         });
         this.commandEngine.on(CommandType.leave, (msg: Message) => {
             this.handleLeave(msg);
+        });
+        this.commandEngine.on(CommandType.save, (msg: Message, playlist?: string) => {
+            this.handleSave(msg, playlist);
+        });
+        this.commandEngine.on(CommandType.load, (msg: Message, playlist?: string) => {
+            this.handleLoad(msg, playlist);
         });
 
     }
@@ -152,6 +164,7 @@ export class GuildManager {
         if (this.activeDispatcher) {
             this.activeDispatcher.destroy();
         }
+        this.currentSong = null;
     }
 
     handleClear(msg: Message) {
@@ -178,6 +191,9 @@ export class GuildManager {
     }
 
     handleLeave(msg: Message) {
+        if (!this.activeConnection) {
+            return;
+        }
         if (!msg.member.voice.channel || msg.member.voice.channel.id != this.activeConnection.channel.id) {
             msg.reply(`You cannot let me leave if you are not in the voice channel I'm playing`);
             return;
@@ -189,6 +205,67 @@ export class GuildManager {
         this.clearPlaylist();
     }
 
+    handleSave(msg: Message, playlist?: string) {
+        if (!fs.existsSync('./playlist')) {
+            fs.mkdirSync('./playlist');
+        }
+
+        const playlistName = playlist ? `./playlist/${playlist}` : './playlist/default';
+        if (!fs.existsSync(playlistName)) {
+            fs.writeFileSync(playlistName, '');
+        }
+
+        if (!this.currentSong) {
+            this.logger.info('Playlist created');
+            return;
+        }
+
+        const currentFile = fs.readFileSync(playlistName);
+        if (currentFile.includes(this.currentSong.url)){
+            this.activeTextChannel.send('Already exists');
+            return;
+        }
+
+        fs.appendFile(playlistName, `${this.currentSong.url}\n`, (err) => {
+            if (err) this.logger.info(err);
+            else this.activeTextChannel.send('Added to playlist');
+        });
+    }
+
+    handleLoad(msg: Message, playlist?: string) {
+        if (!fs.existsSync('./playlist')) {
+            fs.mkdirSync('./playlist');
+            msg.reply('Nothing here yet');
+            return;
+        }
+
+        const playlistName = playlist ? `./playlist/${playlist}` : './playlist/default';
+        if (!fs.existsSync(playlistName)) {
+            msg.reply('The playlist does not exist');
+        }
+
+        const playlistArray = fs.readFileSync(playlistName).toString().split("\n");
+        for (let index in playlistArray) {
+            if (playlistArray[index] === '') continue;
+            getInfo(playlistArray[index]).then((info) => {
+                let song = new BilibiliSong(info, msg.author);
+                song.streamer.start();
+                this.playlist.push(song);
+                if (this.isPlaying) {
+                    this.logger.info(`Song ${song.title} added to the queue`);
+                } else if (!this.activeConnection) {
+                    msg.member.voice.channel.join().then((connection) => {
+                        this.activeConnection = connection;
+                    })
+                } else {
+
+                }
+            }).catch((err) => {
+                if (err) this.logger.info(`Failed loading: ${err}`);
+            });
+        }
+    }
+
     clearPlaylist() {
         while(this.playlist.length > 0) this.playlist.pop();
     }
@@ -196,6 +273,7 @@ export class GuildManager {
     playNext() {
         this.isPlaying = true;
         const currentSong = this.playlist.shift();
+        this.currentSong = currentSong;
         this.logger.info(`Start playing song ${currentSong.title}`);
         this.printPlaying(currentSong);
         const dispatcher = this.activeConnection.play(currentSong.streamer.getOutputStream());
