@@ -4,6 +4,7 @@ import {Logger, getLogger} from "./logger";
 import * as Promise from "bluebird";
 import * as youtubedl from "youtube-dl";
 import {BilibiliSong} from "./bilibili-song";
+import * as api from "./bilibili-api";
 
 let getInfo = Promise.promisify(youtubedl.getInfo);
 
@@ -21,7 +22,9 @@ export const CommandType = {
     save: 'save',
     load: 'load',
     list: 'list',
-    promote: 'promote'
+    promote: 'promote',
+    search: 'search',
+    select: 'select'
 };
 
 export class CommandEngine extends EventEmitter {
@@ -73,6 +76,12 @@ export class CommandEngine extends EventEmitter {
                 break;
             case CommandType.promote:
                 this.processPromote(msg, args);
+                break;
+            case CommandType.search:
+                this.processSearch(msg, args);
+                break;
+            case CommandType.select:
+                this.processSelect(msg, args);
                 break;
             default:
                 break;
@@ -172,6 +181,37 @@ export class CommandEngine extends EventEmitter {
             return;
         }
         this.emit(CommandType.promote, msg, index - 1);
+    }
+
+    processSearch(msg: Message, args: string[]) {
+        if (args.length === 0) {
+            this.emit('usage', `search [keyword]`);
+            return;
+        }
+
+        const keyword = args.shift();
+        let limit = parseInt(args.shift());
+        limit = limit ? limit : 20;
+
+        api.search(keyword, limit).then((entities) => {
+            this.emit(CommandType.search, msg, entities);
+        }).catch(error => {
+            this.logger.error(`Search error: ${error}`);
+            this.emit('error', msg, error);
+        });
+    }
+
+    processSelect(msg: Message, args: string[]) {
+        if (args.length === 0) {
+            this.emit('usage', `select [result-index]`);
+            return;
+        }
+        const index = parseInt(args.shift());
+        if (isNaN(index) || !Number.isInteger(index)) {
+            this.emit('usage', `select [result-index]`);
+            return;
+        }
+        this.emit(CommandType.select, msg, index - 1);
     }
 }
 

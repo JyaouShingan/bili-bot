@@ -5,6 +5,7 @@ import {CommandType, CommandEngine} from "./command";
 import * as youtubedl from "youtube-dl";
 import * as Promise from "bluebird";
 import * as fs from 'fs';
+import {SearchSongEntity} from "./bilibili-api";
 
 let getInfo = Promise.promisify(youtubedl.getInfo);
 
@@ -17,6 +18,7 @@ export class GuildManager {
     activeDispatcher: StreamDispatcher;
     playlist: Array<BilibiliSong>;
     currentSong?: BilibiliSong;
+    currentSearchResult?: Array<SearchSongEntity>;
     commandPrefix: string;
     commandEngine: CommandEngine;
 
@@ -71,6 +73,12 @@ export class GuildManager {
         this.commandEngine.on(CommandType.promote, (msg: Message, index: number) => {
             this.handlePromote(msg, index);
         });
+        this.commandEngine.on(CommandType.search, (msg: Message, entities: SearchSongEntity[]) => {
+            this.handleSearch(msg, entities);
+        });
+        this.commandEngine.on(CommandType.select, (msg: Message, index: number) => {
+            this.handleSelect(msg, index);
+        });
     }
 
     processMessage(msg: Message): void {
@@ -108,23 +116,7 @@ export class GuildManager {
             return;
         }
 
-        // Add to play list
-        song.streamer.start();
-        this.playlist.push(song);
-
-        if (this.isPlaying) {
-            this.logger.info(`Song ${song.title} added to the queue`);
-            let embed = new MessageEmbed()
-                .setDescription(`${song.title} is added to playlist, current number of songs in the list: ${this.playlist.length}`);
-            this.activeTextChannel.send(embed);
-        } else if (!this.activeConnection) {
-            msg.member.voice.channel.join().then((connection) => {
-                this.activeConnection = connection;
-                this.playNext();
-            })
-        } else {
-            this.playNext();
-        }
+        this.playSong(msg, song);
     }
 
     handlePause(msg: Message) {
@@ -274,7 +266,7 @@ export class GuildManager {
             });
         }
     }
-    
+
     handleList(msg: Message) {
         if (this.playlist.length === 0) {
             const embed = new MessageEmbed()
@@ -314,8 +306,67 @@ export class GuildManager {
         msg.react("🐲");
     }
 
+    handleSearch(msg: Message, entities: SearchSongEntity[]) {
+        if (entities.length === 0) {
+            let embed = new MessageEmbed()
+                .setDescription("No result found");
+            this.activeTextChannel.send(embed);
+        } else {
+            this.currentSearchResult = entities;
+            const resultMessage = entities.map((entity, index) => {
+                return `${index + 1}. ${entity.title} - ${entity.play} plays`;
+            });
+            let embed = new MessageEmbed()
+                .setTitle('Search result:')
+                .setDescription(resultMessage)
+                .setFooter(`Use ${this.commandPrefix}select [number] to play a song`);
+            this.activeTextChannel.send(embed);
+        }
+    }
+
+    handleSelect(msg: Message, index: number) {
+        if (!msg.member.voice.channel) {
+            msg.reply('You are not in a voice channel');
+            return;
+        } else if (this.isPlaying && this.activeConnection.channel.id != msg.member.voice.channel.id) {
+            msg.reply(`You cannot select searched song if you are not in the voice channel I'm playing`);
+            return;
+        } else if (!this.currentSearchResult || this.currentSearchResult.length === 0) {
+            msg.reply(`You have not searched yet`);
+            return;
+        } else if (index < 0 || index >= this.currentSearchResult.length) {
+            msg.reply(`The index you entered is out of bounds, please enter a number between ${1} and ${this.currentSearchResult.length}`);
+            return;
+        }
+        getInfo(this.currentSearchResult[index].getUrl()).then((info) => {
+            const song = new BilibiliSong(info, msg.author);
+            this.playSong(msg, song);
+        });
+        this.currentSearchResult = null;
+    }
+
     clearPlaylist() {
         while(this.playlist.length > 0) this.playlist.pop();
+    }
+
+    playSong(msg:Message, song: BilibiliSong) {
+        // Add to play list
+        song.streamer.start();
+        this.playlist.push(song);
+
+        if (this.isPlaying) {
+            this.logger.info(`Song ${song.title} added to the queue`);
+            let embed = new MessageEmbed()
+                .setDescription(`${song.title} is added to playlist, current number of songs in the list: ${this.playlist.length}`);
+            this.activeTextChannel.send(embed);
+        } else if (!this.activeConnection) {
+            msg.member.voice.channel.join().then((connection) => {
+                this.activeConnection = connection;
+                this.playNext();
+            })
+        } else {
+            this.playNext();
+        }
     }
 
     playNext() {
