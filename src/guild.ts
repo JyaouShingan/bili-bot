@@ -73,8 +73,8 @@ export class GuildManager {
         this.commandEngine.on(CommandType.promote, (msg: Message, index: number) => {
             this.handlePromote(msg, index);
         });
-        this.commandEngine.on(CommandType.random, (msg: Message, source?: string) => {
-            this.handleRandom(msg, source);
+        this.commandEngine.on(CommandType.random, (msg: Message, source?: string, song?: SearchSongEntity) => {
+            this.handleRandom(msg, source, song);
         });
         this.commandEngine.on(CommandType.search, (msg: Message, entities: SearchSongEntity[]) => {
             this.handleSearch(msg, entities);
@@ -309,7 +309,8 @@ export class GuildManager {
         msg.react("🐲");
     }
 
-    handleRandom(msg: Message, source?: string) {        
+    handleRandom(msg: Message, source?: string, song?: SearchSongEntity) { 
+        this.logger.info(`Random request - source: ${source}`);    
         if (!source) {
             const defaultList = "./playlist/default";
             if (!fs.existsSync(defaultList)) {
@@ -326,8 +327,20 @@ export class GuildManager {
             }).catch((err) => {
                 if (err) this.logger.error(`Failed selecting random songs: ${err}`);
             });
+        } else if (source == "bmr") {
+            if (!song) return;
+
+            getInfo(song.getUrl()).then((info) => {
+                const song = new BilibiliSong(info, msg.author);
+                this.playSong(msg, song);
+            });
+
+            let embed = new MessageEmbed()
+                .setTitle('Random result:')
+                .setDescription(`${song.title} - ${song.play} plays`);
+            this.activeTextChannel.send(embed);
         } else {
-            // TODO: later
+            // LATER
         }
     }
 
