@@ -20,6 +20,8 @@ export const CommandType = {
     leave: 'leave',
     save: 'save',
     load: 'load',
+    list: 'list',
+    promote: 'promote'
 };
 
 export class CommandEngine extends EventEmitter {
@@ -66,13 +68,19 @@ export class CommandEngine extends EventEmitter {
             case CommandType.load:
                 this.processLoad(msg, args);
                 break;
+            case CommandType.list:
+                this.processList(msg);
+                break;
+            case CommandType.promote:
+                this.processPromote(msg, args);
+                break;
             default:
                 break;
         }
     }
 
     processInfo(msg: Message, args: string[]) {
-        if (args.length == 0) {
+        if (args.length === 0) {
             this.emit('usage', `info [video_url]`);
             return;
         }
@@ -84,7 +92,7 @@ export class CommandEngine extends EventEmitter {
     }
 
     processPlay(msg: Message, args: string[]) {
-        if (args.length == 0) {
+        if (args.length === 0) {
             this.emit('usage', `play [video_url]`);
             return;
         }
@@ -149,5 +157,21 @@ export class CommandEngine extends EventEmitter {
         }
     }
 
+    processList(msg: Message) {
+        this.emit(CommandType.list, msg);
+    }
+
+    processPromote(msg: Message, args: string[]) {
+        if (args.length === 0) {
+            this.emit('usage', `promote [list-index]`);
+            return;
+        }
+        const index = parseInt(args.shift());
+        if (isNaN(index) || !Number.isInteger(index)) {
+            this.emit('usage', `promote [list-index]`);
+            return;
+        }
+        this.emit(CommandType.promote, msg, index - 1);
+    }
 }
 
