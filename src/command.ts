@@ -18,6 +18,8 @@ export const CommandType = {
     shuffle: 'shuffle',
     clear: 'clear',
     leave: 'leave',
+    save: 'save',
+    load: 'load',
     list: 'list',
     promote: 'promote'
 };
@@ -59,6 +61,12 @@ export class CommandEngine extends EventEmitter {
                 break;
             case CommandType.leave:
                 this.processLeave(msg);
+                break;
+            case CommandType.save:
+                this.processSave(msg, args);
+                break;
+            case CommandType.load:
+                this.processLoad(msg, args);
                 break;
             case CommandType.list:
                 this.processList(msg);
@@ -121,6 +129,32 @@ export class CommandEngine extends EventEmitter {
 
     processLeave(msg: Message) {
         this.emit(CommandType.leave, msg);
+    }
+
+    processSave(msg: Message, args: string[]) {
+        if (args.length === 0) {
+            this.emit(CommandType.save, msg, null);
+            return;
+        } else if (args.length === 1) {
+            this.logger.info(`Saving to ${args[0]}`);
+            this.emit(CommandType.save, msg, args[0]);
+            return;
+        } else {
+            // Ignore you
+        }
+    }
+
+    processLoad(msg: Message, args: string[]) {
+        if (args.length === 0) {
+            this.emit(CommandType.load, msg, null);
+            return;
+        } else if (args.length === 1) {
+            this.logger.info(`Loading to ${args[0]}`);
+            this.emit(CommandType.load, msg, args[0]);
+            return;
+        } else {
+            // Ignore you
+        }
     }
 
     processList(msg: Message) {
