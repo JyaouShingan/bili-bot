@@ -1,9 +1,7 @@
 import {Logger, getLogger} from "./logger";
 import {BilibiliSong} from "./bilibili-song";
-import {Message, MessageEmbed, StreamDispatcher, TextChannel, VoiceChannel, VoiceConnection} from "discord.js";
+import {Emoji, Message, MessageEmbed, StreamDispatcher, TextChannel, VoiceChannel, VoiceConnection} from "discord.js";
 import {CommandType, CommandEngine} from "./command";
-import * as youtubedl from "youtube-dl";
-import { Streamer } from "./streamer";
 
 export class GuildManager {
     logger: Logger;
@@ -54,7 +52,12 @@ export class GuildManager {
         this.commandEngine.on(CommandType.leave, (msg: Message) => {
             this.handleLeave(msg);
         });
-
+        this.commandEngine.on(CommandType.list, (msg: Message) => {
+            this.handleList(msg);
+        });
+        this.commandEngine.on(CommandType.promote, (msg: Message, index: number) => {
+            this.handlePromote(msg, index);
+        });
     }
 
     processMessage(msg: Message): void {
@@ -98,6 +101,9 @@ export class GuildManager {
 
         if (this.isPlaying) {
             this.logger.info(`Song ${song.title} added to the queue`);
+            let embed = new MessageEmbed()
+                .setDescription(`${song.title} is added to playlist, current number of songs in the list: ${this.playlist.length}`);
+            this.activeTextChannel.send(embed);
         } else if (!this.activeConnection) {
             msg.member.voice.channel.join().then((connection) => {
                 this.activeConnection = connection;
@@ -187,6 +193,45 @@ export class GuildManager {
         this.activeDispatcher = null;
         this.isPlaying = false;
         this.clearPlaylist();
+    }
+
+    handleList(msg: Message) {
+        if (this.playlist.length === 0) {
+            const embed = new MessageEmbed()
+                .setDescription(`Pending playlist is empty`);
+            this.activeTextChannel.send(embed);
+        } else {
+            const playlistMessage = this.playlist.map((song, index) => {
+                return `${index + 1}. ${song.title} [${song.initiator.toString()}]`;
+            }).join('\n');
+            const embed = new MessageEmbed()
+                .setTitle('Playlist:')
+                .setDescription(playlistMessage);
+            this.activeTextChannel.send(embed);
+        }
+    }
+
+    handlePromote(msg: Message, index: number) {
+        if (!msg.member.voice.channel || msg.member.voice.channel.id != this.activeConnection.channel.id) {
+            msg.reply(`You cannot promote songs if you are not in the voice channel I'm playing`);
+            return;
+        } else if (this.playlist.length === 0) {
+            msg.reply(`Playlist is empty`);
+            return;
+        } else if (index < 0 || index >= this.playlist.length) {
+            msg.reply(`The index you entered is out of bounds, please enter a number between ${1} and ${this.playlist.length}`);
+            return;
+        }
+
+        const song = this.playlist.splice(index)[0];
+        this.playlist.unshift(song);
+
+        const embed = new MessageEmbed()
+            .setDescription(`${song.title} has been promoted to top of the playlist`);
+        this.activeTextChannel.send(embed);
+
+        // Dragon:
+        msg.react("🐲");
     }
 
     clearPlaylist() {
