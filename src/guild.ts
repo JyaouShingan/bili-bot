@@ -73,6 +73,9 @@ export class GuildManager {
         this.commandEngine.on(CommandType.promote, (msg: Message, index: number) => {
             this.handlePromote(msg, index);
         });
+        this.commandEngine.on(CommandType.random, (msg: Message, source?: string) => {
+            this.handleRandom(msg, source);
+        });
         this.commandEngine.on(CommandType.search, (msg: Message, entities: SearchSongEntity[]) => {
             this.handleSearch(msg, entities);
         });
@@ -306,6 +309,28 @@ export class GuildManager {
         msg.react("🐲");
     }
 
+    handleRandom(msg: Message, source?: string) {        
+        if (!source) {
+            const defaultList = "./playlist/default";
+            if (!fs.existsSync(defaultList)) {
+                msg.reply('Default playlist does not exist');
+                return;
+            }
+            const playlistArray = fs.readFileSync("./playlist/default").toString().split("\n");
+            msg.reply('Random selecting from default playlist');
+            const randomIndex = Math.floor(Math.random() * (playlistArray.length - 1));
+
+            getInfo(playlistArray[randomIndex]).then((info) => {
+                let song = new BilibiliSong(info, msg.author);
+                this.playSong(msg, song);
+            }).catch((err) => {
+                if (err) this.logger.error(`Failed selecting random songs: ${err}`);
+            });
+        } else {
+            // TODO: later
+        }
+    }
+
     handleSearch(msg: Message, entities: SearchSongEntity[]) {
         if (entities.length === 0) {
             let embed = new MessageEmbed()
@@ -349,7 +374,7 @@ export class GuildManager {
         while(this.playlist.length > 0) this.playlist.pop();
     }
 
-    playSong(msg:Message, song: BilibiliSong) {
+    playSong(msg: Message, song: BilibiliSong) {
         // Add to play list
         song.streamer.start();
         this.playlist.push(song);

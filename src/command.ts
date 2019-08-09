@@ -24,7 +24,8 @@ export const CommandType = {
     list: 'list',
     promote: 'promote',
     search: 'search',
-    select: 'select'
+    select: 'select',
+    random: 'random',
 };
 
 export class CommandEngine extends EventEmitter {
@@ -82,6 +83,9 @@ export class CommandEngine extends EventEmitter {
                 break;
             case CommandType.select:
                 this.processSelect(msg, args);
+                break;
+            case CommandType.random:
+                this.processRandom(msg, args);
                 break;
             default:
                 break;
@@ -212,6 +216,15 @@ export class CommandEngine extends EventEmitter {
             return;
         }
         this.emit(CommandType.select, msg, index - 1);
+    }
+
+    processRandom(msg: Message, args: string[]) {
+        if (args.length === 0) {
+            this.emit(CommandType.random, msg, null );
+            return;
+        } else {
+            // TODO: add bilibili and youtube support
+        }
     }
 }
 
