@@ -71,6 +71,9 @@ export class GuildManager {
         this.commandEngine.on(CommandType.promote, (msg: Message, index: number) => {
             this.handlePromote(msg, index);
         });
+        this.commandEngine.on(CommandType.random, (msg: Message, source?: string) => {
+            this.handleRandom(msg, source);
+        });
     }
 
     processMessage(msg: Message): void {
@@ -312,6 +315,39 @@ export class GuildManager {
 
         // Dragon:
         msg.react("🐲");
+    }
+
+    handleRandom(msg: Message, source?: string) {        
+        if (!source) {
+            const defaultList = "./playlist/default";
+            if (!fs.existsSync(defaultList)) {
+                msg.reply('Default playlist does not exist');
+                return;
+            }
+            const playlistArray = fs.readFileSync("./playlist/default").toString().split("\n");
+            msg.reply('Random selecting from default playlist');
+            const randomIndex = Math.floor(Math.random() * (playlistArray.length - 1));
+
+            getInfo(playlistArray[randomIndex]).then((info) => {
+                let song = new BilibiliSong(info, msg.author);
+                song.streamer.start();
+                this.playlist.push(song);
+                if (this.isPlaying) {
+                    this.logger.info(`Song ${song.title} added to the queue`);
+                } else if (!this.activeConnection) {
+                    msg.member.voice.channel.join().then((connection) => {
+                        this.activeConnection = connection;
+                        this.playNext();
+                    })
+                } else {
+                    this.playNext();
+                }
+            }).catch((err) => {
+                if (err) this.logger.info(`Failed loading: ${err}`);
+            });
+        } else {
+            // TODO: later
+        }
     }
 
     clearPlaylist() {
