@@ -39,7 +39,7 @@ export class SearchSongEntity {
 export function search(keyword: string, limit?: number): Promise<SearchSongEntity[]> {
     let params = {
         get: "search",
-        keyword: keyword,
+        keyword,
     };
     if (limit) params['pagesize'] = limit;
 
@@ -59,5 +59,33 @@ export function search(keyword: string, limit?: number): Promise<SearchSongEntit
                 .setVideoId(raw['param'])
                 .setPlay(raw['play']);
         });
+    });
+}
+
+export function randomRanking(
+    type: string, 
+    content: number,
+): Promise<SearchSongEntity> {
+    let params = {
+        get: "rank",
+        type,
+        content,
+    };
+
+    let req = {
+        uri: apiBaseUrl,
+        qs: params,
+        json: true
+    };
+    return request(req).then((res) => {
+        const rawSongs = res['rank']['list'];
+        const randomIndex = Math.floor(Math.random() * rawSongs.length);
+        const raw = rawSongs[randomIndex];
+        logger.info(`Random result av${raw["aid"]} selected from Bilibili`);
+        return new SearchSongEntity()
+            .setTitle(raw['title'])
+            .setAuthor(raw['author'])
+            .setVideoId(raw['aid'])
+            .setPlay(raw['play']);
     });
 }

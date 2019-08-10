@@ -220,10 +220,17 @@ export class CommandEngine extends EventEmitter {
 
     processRandom(msg: Message, args: string[]) {
         if (args.length === 0) {
-            this.emit(CommandType.random, msg, null );
-            return;
+            this.emit(CommandType.random, msg);
+        } else if (args[0] == "bmr"){
+            // Only support bmr now
+            api.randomRanking("all", 3).then((entity) => {
+                this.emit(CommandType.random, msg, "bmr", entity);
+            }).catch(error => {
+                this.logger.error(`Song random error: ${error}`);
+                this.emit('error', msg, error);
+            });
         } else {
-            // TODO: add bilibili and youtube support
+            // More
         }
     }
 }
