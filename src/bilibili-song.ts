@@ -24,4 +24,8 @@ export class BilibiliSong {
         this.initiator = initiator;
         this.streamer = new Streamer(this);
     }
+
+    getUrl() {
+        return this.url;
+    }
 }

@@ -26,6 +26,7 @@ export const CommandType = {
     search: 'search',
     select: 'select',
     random: 'random',
+    showlist: 'showlist',
 };
 
 export class CommandEngine extends EventEmitter {
@@ -86,6 +87,9 @@ export class CommandEngine extends EventEmitter {
                 break;
             case CommandType.random:
                 this.processRandom(msg, args);
+                break;
+            case CommandType.showlist:
+                this.processShowlist(msg, args);
                 break;
             default:
                 break;
@@ -233,6 +237,11 @@ export class CommandEngine extends EventEmitter {
         } else {
             // More
         }
+    }
+
+    processShowlist(msg: Message, args: string[]) {
+        const playlist = args[0] || 'default';
+        this.emit(CommandType.showlist, msg, playlist);
     }
 }
 
