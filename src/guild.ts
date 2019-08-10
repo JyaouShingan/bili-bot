@@ -34,7 +34,7 @@ export class GuildManager {
     }
 
     setupCommandEnginee(): void {
-        this.commandEngine.on(CommandType.info, (msg: Message, song: BilibiliSong) => {
+        this.commandEngine.on(CommandType.info, (msg: Message, song?: BilibiliSong) => {
             this.handleInfo(msg, song);
         });
         this.commandEngine.on(CommandType.play, (msg: Message, song: BilibiliSong) => {
@@ -95,13 +95,19 @@ export class GuildManager {
         }
     }
 
-    handleInfo(msg: Message, song: BilibiliSong) {
-        this.logger.info(`Info command - ${song.title}`);
+    handleInfo(msg: Message, song?: BilibiliSong) {
+        const currentSong = song || this.currentSong;
+        if (!currentSong) {
+            msg.reply("Invalid Operation");
+            return;
+        }
+        this.logger.info(`Info command - ${currentSong.title}`);
         let embed = new MessageEmbed()
-            .setTitle(song.title)
-            .setDescription(song.description)
-            .setFooter(song.hmsDuration)
-            .setThumbnail(song.thumbnail)
+            .setTitle(currentSong.title)
+            .setDescription(currentSong.description)
+            .setFooter(currentSong.hmsDuration)
+            .setThumbnail(currentSong.thumbnail)
+            .setURL(currentSong.url)
             .setColor(0x00FF00);
         msg.channel.send(embed);
     }
@@ -327,7 +333,7 @@ export class GuildManager {
             }).catch((err) => {
                 if (err) this.logger.error(`Failed selecting random songs: ${err}`);
             });
-        } else if (source == "bmr") {
+        } else if (source == "bilibili") {
             if (!song) return;
 
             getInfo(song.getUrl()).then((info) => {
