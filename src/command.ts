@@ -94,14 +94,14 @@ export class CommandEngine extends EventEmitter {
 
     processInfo(msg: Message, args: string[]) {
         if (args.length === 0) {
-            this.emit('usage', `info [video_url]`);
-            return;
+            this.emit(CommandType.info, msg, null);
+        } else {
+            getInfo(args.shift()).then((info) => {
+                this.emit(CommandType.info, msg, new BilibiliSong(info, msg.author));
+            }).catch((err) => {
+                this.emit('error', msg, err);
+            });
         }
-        getInfo(args.shift()).then((info) => {
-            this.emit(CommandType.info, msg, new BilibiliSong(info, msg.author));
-        }).catch((err) => {
-            this.emit('error', msg, err);
-        });
     }
 
     processPlay(msg: Message, args: string[]) {
@@ -221,10 +221,11 @@ export class CommandEngine extends EventEmitter {
     processRandom(msg: Message, args: string[]) {
         if (args.length === 0) {
             this.emit(CommandType.random, msg);
-        } else if (args[0] == "bmr"){
-            // Only support bmr now
-            api.randomRanking("all", 3).then((entity) => {
-                this.emit(CommandType.random, msg, "bmr", entity);
+        } else if (args[0] == "-b"){
+            const catagory = args[1] || 'music';
+            // TODO: add type support
+            api.randomRanking(catagory, "all").then((entity) => {
+                this.emit(CommandType.random, msg, "bilibili", entity);
             }).catch(error => {
                 this.logger.error(`Song random error: ${error}`);
                 this.emit('error', msg, error);
