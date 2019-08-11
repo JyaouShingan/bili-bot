@@ -9,7 +9,7 @@ export class ShuffleCommand extends BaseCommand {
     }
 
     async run(message: Message, guild: GuildManager, args?: string[]): Promise<void> {
-        await guild.checkMemberInChannel(message.member);
+        guild.checkMemberInChannel(message.member);
         if (!guild.isPlaying) return;
         for (let i = guild.playlist.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));

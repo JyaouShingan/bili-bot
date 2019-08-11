@@ -9,7 +9,7 @@ export class PromoteCommand extends BaseCommand {
     }
 
     async run(message: Message, guild: GuildManager, args?: string[]): Promise<void> {
-        await guild.checkMemberInChannel(message.member);
+        guild.checkMemberInChannel(message.member);
         if (args.length === 0) {
             throw CommandException.UserPresentable(this.helpMessage());
         }

@@ -14,7 +14,7 @@ export class RandomCommand extends BaseCommand {
     }
 
     async run(message: Message, guild: GuildManager, args?: string[]): Promise<void> {
-        await guild.checkMemberInChannel(message.member);
+        guild.checkMemberInChannel(message.member);
         await this.doRandom(message, guild, args[0], args[1]);
     }
 

@@ -9,7 +9,7 @@ export class LeaveCommand extends BaseCommand {
     }
 
     async run(message: Message, guild: GuildManager, args?: string[]): Promise<void> {
-        await guild.checkMemberInChannel(message.member);
+        guild.checkMemberInChannel(message.member);
         if (!guild.activeConnection) return;
         guild.activeConnection.disconnect();
         guild.activeConnection = null;

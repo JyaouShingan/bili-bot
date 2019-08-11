@@ -9,7 +9,7 @@ export class ClearCommand extends BaseCommand {
     }
 
     async run(message: Message, guild: GuildManager, args?: string[]): Promise<void> {
-        await guild.checkMemberInChannel(message.member);
+        guild.checkMemberInChannel(message.member);
         if (!guild.isPlaying) return;
         guild.clearPlaylist();
         message.channel.send(new MessageEmbed().setDescription('Playlist cleared'));

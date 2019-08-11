@@ -9,7 +9,7 @@ export class PauseCommand extends BaseCommand {
     }
 
     async run(message: Message, guild: GuildManager, args?: string[]): Promise<void> {
-        await guild.checkMemberInChannel(message.member);
+        guild.checkMemberInChannel(message.member);
         if (guild.activeDispatcher) {
             guild.activeDispatcher.pause();
             message.reply('Audio paused!');

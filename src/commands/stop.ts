@@ -9,7 +9,7 @@ export class StopCommand extends BaseCommand {
     }
 
     async run(message: Message, guild: GuildManager, args?: string[]): Promise<void> {
-        await guild.checkMemberInChannel(message.member);
+        guild.checkMemberInChannel(message.member);
         if (!guild.isPlaying) {
             throw CommandException.UserPresentable("I'm not currently playing");
         } else {

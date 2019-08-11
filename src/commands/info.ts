@@ -12,7 +12,7 @@ export class InfoCommand extends BaseCommand {
 
     async run(message: Message, guild: GuildManager, args?: string[]): Promise<void> {
         if (args.length === 0) {
-            await guild.checkMemberInChannel(message.member);
+            guild.checkMemberInChannel(message.member);
             this.processResult(message, guild, null);
         } else {
             const info = await utils.getInfo(args.shift());
