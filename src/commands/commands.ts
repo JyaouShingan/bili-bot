@@ -1,4 +1,5 @@
-import {Command, CommandType} from "./base-command";
+import {Command} from "./base-command";
+import {CommandType} from "./command-type";
 import {InfoCommand} from "./info";
 import {PlayCommand} from "./play";
 import {PauseCommand} from "./pause";

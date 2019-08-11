@@ -1,6 +1,6 @@
 import {Logger, getLogger} from "./logger";
 import {BilibiliSong} from "./bilibili-song";
-import {Message, MessageEmbed, StreamDispatcher, TextChannel, VoiceConnection} from "discord.js";
+import {GuildMember, Message, MessageEmbed, StreamDispatcher, TextChannel, VoiceConnection} from "discord.js";
 import * as Promise from "bluebird";
 import {SearchSongEntity} from "./bilibili-api";
 import {CommandEngine} from "./command-engine";
@@ -99,10 +99,10 @@ export class GuildManager {
         this.activeTextChannel.send(embed);
     }
 
-    checkUserInChannel(message: Message): Promise<void> {
-        if (!message.member.voice || !message.member.voice.channel) {
+    checkMemberInChannel(member: GuildMember): Promise<void> {
+        if (!member.voice || !member.voice.channel) {
             return Promise.reject(CommandException.UserPresentable('You are not in a voice channel'));
-        } else if (this.activeConnection && message.member.voice.channel.id != this.activeConnection.channel.id) {
+        } else if (this.activeConnection && member.voice.channel.id != this.activeConnection.channel.id) {
             return Promise.reject(CommandException.UserPresentable("You cannot use this command if you are not in the channel I'm playing"));
         } else {
             return Promise.resolve();

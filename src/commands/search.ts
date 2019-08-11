@@ -1,16 +1,17 @@
-import {BaseCommand, CommandException, CommandType} from "./base-command";
+import {BaseCommand, CommandException} from "./base-command";
+import {CommandType} from "./command-type";
 import * as Promise from "bluebird";
 import {GuildManager} from "../guild";
 import {Message, MessageEmbed} from "discord.js";
 import * as api from "../bilibili-api";
 
 export class SearchCommand extends BaseCommand {
-    protected type(): CommandType {
+    type(): CommandType {
         return CommandType.SEARCH;
     }
 
     run(message: Message, guild: GuildManager, args?: string[]): Promise<void> {
-        return guild.checkUserInChannel(message).then(() => {
+        return guild.checkMemberInChannel(message.member).then(() => {
             if (args.length === 0) {
                 throw CommandException.UserPresentable(this.helpMessage());
             }

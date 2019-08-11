@@ -1,4 +1,5 @@
-import {BaseCommand, CommandException, CommandType} from "./base-command";
+import {BaseCommand, CommandException} from "./base-command";
+import {CommandType} from "./command-type";
 import * as Promise from "bluebird";
 import {GuildManager} from "../guild";
 import {Message, MessageEmbed} from "discord.js";
@@ -8,12 +9,12 @@ import {BilibiliSong} from "../bilibili-song";
 import {getInfo} from "../utils/utils";
 
 export class RandomCommand extends BaseCommand {
-    protected type(): CommandType {
+    type(): CommandType {
         return CommandType.RANDOM;
     }
 
     run(message: Message, guild: GuildManager, args?: string[]): Promise<void> {
-        return guild.checkUserInChannel(message).then(() => {
+        return guild.checkMemberInChannel(message.member).then(() => {
             return this.doRandom(message, guild, args[0], args[1]);
         });
     }
@@ -22,7 +23,7 @@ export class RandomCommand extends BaseCommand {
         return 'random <playlist|-b> <category>';
     }
 
-    doRandom(message: Message, guild: GuildManager, source?: string, category?: string): Promise<void> {
+    private doRandom(message: Message, guild: GuildManager, source?: string, category?: string): Promise<void> {
         this.logger.info(`Random request - source: ${source}`);
         if (source) {
             if (source == '-b') {
@@ -35,7 +36,7 @@ export class RandomCommand extends BaseCommand {
         }
     }
 
-    doLocalRandom(message: Message, guild: GuildManager, playlist?: string): Promise<void> {
+    private doLocalRandom(message: Message, guild: GuildManager, playlist?: string): Promise<void> {
         const defaultList = "./playlist/default";
         const list = playlist ? `./playlist/${playlist}` : defaultList;
         if (!fs.existsSync(list)) {
@@ -56,7 +57,7 @@ export class RandomCommand extends BaseCommand {
         });
     }
 
-    doBilibiliRandom(message: Message, guild: GuildManager, category?:string): Promise<void> {
+    private doBilibiliRandom(message: Message, guild: GuildManager, category?:string): Promise<void> {
         category = category || 'music';
 
         return api.randomRanking(category, 'all').then((entity) => {

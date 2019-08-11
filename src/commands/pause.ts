@@ -1,15 +1,16 @@
-import {BaseCommand, CommandType} from "./base-command";
+import {BaseCommand} from "./base-command";
+import {CommandType} from "./command-type";
 import {Message} from "discord.js";
 import {GuildManager} from "../guild";
 import * as Promise from "bluebird";
 
 export class PauseCommand extends BaseCommand {
-    protected type(): CommandType {
+    type(): CommandType {
         return CommandType.PAUSE;
     }
 
     run(message: Message, guild: GuildManager, args?: string[]): Promise<void> {
-        return guild.checkUserInChannel(message).then(() => {
+        return guild.checkMemberInChannel(message.member).then(() => {
             if (guild.activeDispatcher) {
                 guild.activeDispatcher.pause();
                 message.reply('Audio paused!');

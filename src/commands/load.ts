@@ -1,4 +1,5 @@
-import {BaseCommand, CommandException, CommandType} from "./base-command";
+import {BaseCommand} from "./base-command";
+import {CommandType} from "./command-type";
 import * as Promise from "bluebird";
 import {GuildManager} from "../guild";
 import {Message} from "discord.js";
@@ -7,12 +8,12 @@ import {BilibiliSong} from "../bilibili-song";
 import {getInfo} from "../utils/utils";
 
 export class LoadCommand extends BaseCommand {
-    protected type(): CommandType {
+    type(): CommandType {
         return CommandType.LOAD;
     }
 
     run(message: Message, guild: GuildManager, args?: string[]): Promise<void> {
-        return guild.checkUserInChannel(message).then(() => {
+        return guild.checkMemberInChannel(message.member).then(() => {
             if (args.length === 0) {
                 this.logger.info('Loading from default list');
                 this.load(message, guild);
@@ -27,7 +28,7 @@ export class LoadCommand extends BaseCommand {
         return 'Usage: load <list-name>';
     }
 
-    load(message: Message, guild: GuildManager, collection?: string) {
+    private load(message: Message, guild: GuildManager, collection?: string) {
         if (!fs.existsSync('./playlist')) {
             fs.mkdirSync('./playlist');
             message.reply('Nothing here yet');
@@ -62,5 +63,4 @@ export class LoadCommand extends BaseCommand {
             });
         }
     }
-
 }

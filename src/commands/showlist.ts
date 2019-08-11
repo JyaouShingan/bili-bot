@@ -1,4 +1,5 @@
-import {BaseCommand, CommandException, CommandType} from "./base-command";
+import {BaseCommand} from "./base-command";
+import {CommandType} from "./command-type";
 import * as Promise from "bluebird";
 import {GuildManager} from "../guild";
 import {Message, MessageEmbed} from "discord.js";
@@ -7,12 +8,12 @@ import {BilibiliSong} from "../bilibili-song";
 import {getInfo} from "../utils/utils";
 
 export class ShowlistCommand extends BaseCommand {
-    protected type(): CommandType {
+    type(): CommandType {
         return CommandType.SHOWLIST;
     }
 
     run(message: Message, guild: GuildManager, args?: string[]): Promise<void> {
-        return guild.checkUserInChannel(message).then(() => {
+        return guild.checkMemberInChannel(message.member).then(() => {
             const playlist = args[0] || 'default';
             if (!fs.existsSync('./playlist')) {
                 fs.mkdirSync('./playlist');

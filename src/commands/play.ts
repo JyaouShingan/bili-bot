@@ -1,4 +1,5 @@
-import {BaseCommand, CommandType} from "./base-command";
+import {BaseCommand} from "./base-command";
+import {CommandType} from "./command-type";
 import * as Promise from "bluebird";
 import {GuildManager} from "../guild";
 import {Message} from "discord.js";
@@ -6,12 +7,12 @@ import {getInfo} from "../utils/utils";
 import {BilibiliSong} from "../bilibili-song";
 
 export class PlayCommand extends BaseCommand {
-    protected type(): CommandType {
+    type(): CommandType {
         return CommandType.PLAY;
     }
 
     run(message: Message, guild: GuildManager, args?: string[]): Promise<void> {
-        return guild.checkUserInChannel(message).then(() => {
+        return guild.checkMemberInChannel(message.member).then(() => {
             if (args.length === 0) {
                 throw this.helpMessage();
             } else {

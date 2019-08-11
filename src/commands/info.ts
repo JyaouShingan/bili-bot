@@ -1,4 +1,5 @@
-import {CommandType, BaseCommand, CommandException} from "./base-command";
+import {BaseCommand, CommandException} from "./base-command";
+import {CommandType} from "./command-type";
 import {Message, MessageEmbed} from "discord.js";
 import {GuildManager} from "../guild";
 import {BilibiliSong} from "../bilibili-song";
@@ -6,13 +7,13 @@ import * as utils from "../utils/utils";
 import * as Promise from 'bluebird';
 
 export class InfoCommand extends BaseCommand {
-    protected type(): CommandType {
+    type(): CommandType {
         return CommandType.INFO;
     }
 
     run(message: Message, guild: GuildManager, args?: string[]): Promise<void> {
         if (args.length === 0) {
-            return guild.checkUserInChannel(message).then(() => {
+            return guild.checkMemberInChannel(message.member).then(() => {
                 this.processResult(message, guild, null);
             });
         } else {
@@ -22,7 +23,7 @@ export class InfoCommand extends BaseCommand {
         }
     }
 
-    processResult(message: Message, guild: GuildManager, song?: BilibiliSong): void {
+    private processResult(message: Message, guild: GuildManager, song?: BilibiliSong): void {
         const currentSong = song || guild.currentSong;
         if (!currentSong) {
             throw CommandException.UserPresentable('Invalid command');
