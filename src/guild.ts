@@ -1,6 +1,6 @@
 import {Logger, getLogger} from "./logger";
 import {BilibiliSong} from "./bilibili-song";
-import {Emoji, Message, MessageEmbed, StreamDispatcher, TextChannel, VoiceChannel, VoiceConnection} from "discord.js";
+import {Emoji, Message, MessageEmbed, StreamDispatcher, TextChannel, VoiceChannel, VoiceConnection, MessageAttachment} from "discord.js";
 import {CommandType, CommandEngine} from "./command";
 import * as youtubedl from "youtube-dl";
 import * as Promise from "bluebird";
@@ -19,14 +19,18 @@ export class GuildManager {
     playlist: Array<BilibiliSong>;
     currentSong?: BilibiliSong;
     currentSearchResult?: Array<SearchSongEntity>;
+    currentShowlistResult: Array<BilibiliSong>;
     commandPrefix: string;
     commandEngine: CommandEngine;
+    previousCommand: null | "search" | "showlist";
 
     constructor(id: string, prefix: string = '~') {
         this.logger = getLogger(`GuildManager-${id}`);
         this.id = id;
         this.isPlaying = false;
         this.playlist = [];
+        this.currentShowlistResult = [];
+        this.previousCommand = null;
         this.currentSong = null;
         this.commandPrefix = prefix;
         this.commandEngine = new CommandEngine();
@@ -81,6 +85,9 @@ export class GuildManager {
         });
         this.commandEngine.on(CommandType.select, (msg: Message, index: number) => {
             this.handleSelect(msg, index);
+        });
+        this.commandEngine.on(CommandType.showlist, (msg: Message, playlist: string) => {
+            this.handleShowlist(msg, playlist);
         });
     }
 
@@ -351,6 +358,7 @@ export class GuildManager {
     }
 
     handleSearch(msg: Message, entities: SearchSongEntity[]) {
+        this.currentSearchResult = null;
         if (entities.length === 0) {
             let embed = new MessageEmbed()
                 .setDescription("No result found");
@@ -365,29 +373,82 @@ export class GuildManager {
                 .setDescription(resultMessage)
                 .setFooter(`Use ${this.commandPrefix}select [number] to play a song`);
             this.activeTextChannel.send(embed);
+            this.previousCommand = "search";
         }
     }
 
     handleSelect(msg: Message, index: number) {
+        if (!this.previousCommand) {
+            msg.reply("Invalid Operation: Please do >search or >showlist first");
+            return 
+        }
+        let searchBase = this.previousCommand == "search" ? this.currentSearchResult : this.currentShowlistResult;
         if (!msg.member.voice.channel) {
             msg.reply('You are not in a voice channel');
             return;
         } else if (this.isPlaying && this.activeConnection.channel.id != msg.member.voice.channel.id) {
             msg.reply(`You cannot select searched song if you are not in the voice channel I'm playing`);
             return;
-        } else if (!this.currentSearchResult || this.currentSearchResult.length === 0) {
-            msg.reply(`You have not searched yet`);
+        } else if (!searchBase || searchBase.length === 0) {
+            msg.reply('You cannot search from an empty result');
             return;
-        } else if (index < 0 || index >= this.currentSearchResult.length) {
-            msg.reply(`The index you entered is out of bounds, please enter a number between ${1} and ${this.currentSearchResult.length}`);
+        } else if (index < 0 || index >= searchBase.length) {
+            msg.reply(`The index you entered is out of bounds, please enter a number between ${1} and ${searchBase.length}`);
             return;
         }
-        getInfo(this.currentSearchResult[index].getUrl()).then((info) => {
+        getInfo(searchBase[index].getUrl()).then((info) => {
             const song = new BilibiliSong(info, msg.author);
             this.playSong(msg, song);
         });
-        this.currentSearchResult = null;
+        this.previousCommand = null;
     }
+
+    handleShowlist(msg: Message, playlist: string) {
+        if (!fs.existsSync('./playlist')) {
+            fs.mkdirSync('./playlist');
+            msg.reply('Nothing here yet');
+            return;
+        }
+        
+        const playlistName = playlist ? `./playlist/${playlist}` : './playlist/default';
+        if (!fs.existsSync(playlistName)) {
+            msg.reply('The playlist does not exist');
+            return;
+        }
+        while (this.currentShowlistResult.length > 0) this.currentShowlistResult.pop();
+        const playlistArray = fs.readFileSync(playlistName).toString().split("\n");
+        // pop the last empty element
+        playlistArray.pop();
+        
+        if (playlistArray.length === 0) {
+            msg.reply('The playlist is empty');
+        } else {
+            const songs = playlistArray.map((url) => {
+                return getInfo(url).then((info) => {
+                    return new BilibiliSong(info, msg.author);
+                });
+            });
+
+            Promise.all(songs).then((result) => {
+                for (let index in result) {
+                    this.currentShowlistResult.push(result[index]);
+                }
+
+                const resultMessage = this.currentShowlistResult.map((song, index) => {
+                    return `${index + 1}. ${song.author} - ${song.title}`;
+                });
+
+                let embed = new MessageEmbed()
+                    .setTitle('Songs in this playlist:')
+                    .setDescription(resultMessage)
+                    .setFooter(`Use ${this.commandPrefix}select [number] to play a song`);
+                this.activeTextChannel.send(embed);
+                this.previousCommand = "showlist";
+            });
+        }
+    }
+
+    // HELPER FUNCTIONS
 
     clearPlaylist() {
         while(this.playlist.length > 0) this.playlist.pop();
