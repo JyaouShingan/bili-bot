@@ -1,6 +1,7 @@
 import {getLogger} from './logger';
 import * as request from "request-promise";
 import RandomMapping from './const/random-mapping';
+import * as Promise from 'bluebird';
 
 const logger = getLogger('BilibiliApi');
 const apiBaseUrl = "https://api.imjad.cn/bilibili/v2";
@@ -64,7 +65,7 @@ export function search(keyword: string, limit?: number): Promise<SearchSongEntit
 
 export function randomRanking(
     catagory: string,
-    type: string, 
+    type: string,
 ): Promise<SearchSongEntity> {
     const content = RandomMapping[catagory] || 1;
     const params = {

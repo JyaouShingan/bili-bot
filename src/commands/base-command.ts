@@ -30,6 +30,7 @@ export interface Command {
     readonly logger: Logger
     getType(): CommandType
     run(message: Message, guild: GuildManager, args?: string[]): Promise<void>
+    helpMessage(): string
 }
 
 export class BaseCommand implements Command {
@@ -52,5 +53,31 @@ export class BaseCommand implements Command {
     run(message: Message, guild: GuildManager, args?: string[]): Promise<void> {
         // Noop
         return Promise.resolve();
+    }
+
+    helpMessage(): string {
+        return 'BaseCommand - Override this';
+    }
+}
+
+export class CommandException {
+    userPresentable: boolean;
+    error: any ;
+
+    constructor(userPresentable: boolean, error: any) {
+        this.userPresentable = userPresentable;
+        this.error = error;
+    }
+
+    static UserPresentable(message: string): CommandException {
+        return new CommandException(true, message);
+    }
+
+    static Internal(error: any): CommandException {
+        return new CommandException(false, error);
+    }
+
+    toString() {
+        return this.error.toString();
     }
 }
