@@ -1,11 +1,11 @@
 import {Logger, getLogger} from "./logger";
 import {BilibiliSong} from "./bilibili-song";
 import {Emoji, Message, MessageEmbed, StreamDispatcher, TextChannel, VoiceChannel, VoiceConnection, MessageAttachment} from "discord.js";
-import {CommandType, CommandEngine} from "./command";
 import * as youtubedl from "youtube-dl";
 import * as Promise from "bluebird";
 import * as fs from 'fs';
 import {SearchSongEntity} from "./bilibili-api";
+import {CommandEngine} from "./command-engine";
 
 let getInfo = Promise.promisify(youtubedl.getInfo);
 
@@ -33,10 +33,10 @@ export class GuildManager {
         this.previousCommand = null;
         this.currentSong = null;
         this.commandPrefix = prefix;
-        this.commandEngine = new CommandEngine();
-        this.setupCommandEnginee();
+        this.commandEngine = new CommandEngine(this);
     }
 
+    /*
     setupCommandEnginee(): void {
         this.commandEngine.on(CommandType.info, (msg: Message, song?: BilibiliSong) => {
             this.handleInfo(msg, song);
@@ -89,11 +89,11 @@ export class GuildManager {
         this.commandEngine.on(CommandType.showlist, (msg: Message, playlist: string) => {
             this.handleShowlist(msg, playlist);
         });
-    }
+    } */
 
     processMessage(msg: Message): void {
-        this.logger.info(`Processing message: ${msg.content}`);
         if (msg.content.startsWith(this.commandPrefix)) {
+            this.logger.info(`Processing command: ${msg.content}`);
             let command = msg.content.slice(this.commandPrefix.length);
             let args = command.split(/\s+/);
             if (args.length < 1) return;
@@ -322,8 +322,8 @@ export class GuildManager {
         msg.react("🐲");
     }
 
-    handleRandom(msg: Message, source?: string, song?: SearchSongEntity) { 
-        this.logger.info(`Random request - source: ${source}`);    
+    handleRandom(msg: Message, source?: string, song?: SearchSongEntity) {
+        this.logger.info(`Random request - source: ${source}`);
         if (!source) {
             const defaultList = "./playlist/default";
             if (!fs.existsSync(defaultList)) {
@@ -380,7 +380,7 @@ export class GuildManager {
     handleSelect(msg: Message, index: number) {
         if (!this.previousCommand) {
             msg.reply("Invalid Operation: Please do >search or >showlist first");
-            return 
+            return
         }
         let searchBase = this.previousCommand == "search" ? this.currentSearchResult : this.currentShowlistResult;
         if (!msg.member.voice.channel) {
@@ -409,7 +409,7 @@ export class GuildManager {
             msg.reply('Nothing here yet');
             return;
         }
-        
+
         const playlistName = playlist ? `./playlist/${playlist}` : './playlist/default';
         if (!fs.existsSync(playlistName)) {
             msg.reply('The playlist does not exist');
@@ -419,7 +419,7 @@ export class GuildManager {
         const playlistArray = fs.readFileSync(playlistName).toString().split("\n");
         // pop the last empty element
         playlistArray.pop();
-        
+
         if (playlistArray.length === 0) {
             msg.reply('The playlist is empty');
         } else {
@@ -501,5 +501,17 @@ export class GuildManager {
             .setTitle('Now playing')
             .setDescription(`${song.title} [<@${song.initiator.id}>]`);
         this.activeTextChannel.send(embed);
+    }
+
+    checkUserInChannel(message: Message): boolean {
+        if (!message.member.voice || !message.member.voice.channel) {
+            message.reply('You are not in a voice channel');
+            return false;
+        } else if (this.activeConnection && message.member.voice.channel.id != this.activeConnection.channel.id) {
+            message.reply("You cannot use this command if you are not in the channel I'm playing");
+            return false;
+        } else {
+            return true;
+        }
     }
 }
