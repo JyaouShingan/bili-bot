@@ -4,22 +4,19 @@ import {Message, MessageEmbed} from "discord.js";
 import {GuildManager} from "../guild";
 import {BilibiliSong} from "../bilibili-song";
 import * as utils from "../utils/utils";
-import * as Promise from 'bluebird';
 
 export class InfoCommand extends BaseCommand {
     type(): CommandType {
         return CommandType.INFO;
     }
 
-    run(message: Message, guild: GuildManager, args?: string[]): Promise<void> {
+    async run(message: Message, guild: GuildManager, args?: string[]): Promise<void> {
         if (args.length === 0) {
-            return guild.checkMemberInChannel(message.member).then(() => {
-                this.processResult(message, guild, null);
-            });
+            guild.checkMemberInChannel(message.member);
+            this.processResult(message, guild, null);
         } else {
-            return utils.getInfo(args.shift()).then((info) => {
-                this.processResult(message, guild, new BilibiliSong(info, message.author));
-            });
+            const info = await utils.getInfo(args.shift());
+            this.processResult(message, guild, new BilibiliSong(info, message.author));
         }
     }
 
