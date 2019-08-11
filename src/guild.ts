@@ -99,13 +99,13 @@ export class GuildManager {
         this.activeTextChannel.send(embed);
     }
 
-    checkMemberInChannel(member: GuildMember): Promise<void> {
+    checkMemberInChannel(member: GuildMember): void {
         if (!member.voice || !member.voice.channel) {
-            return Promise.reject(CommandException.UserPresentable('You are not in a voice channel'));
+            throw CommandException.UserPresentable('You are not in a voice channel');
         } else if (this.activeConnection && member.voice.channel.id != this.activeConnection.channel.id) {
-            return Promise.reject(CommandException.UserPresentable("You cannot use this command if you are not in the channel I'm playing"));
+            throw (CommandException.UserPresentable("You cannot use this command if you are not in the channel I'm playing"));
         } else {
-            return Promise.resolve();
+            return;
         }
     }
 }
