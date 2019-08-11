@@ -1,14 +1,10 @@
 import {Logger, getLogger} from "./logger";
 import {BilibiliSong} from "./bilibili-song";
 import {Message, MessageEmbed, StreamDispatcher, TextChannel, VoiceConnection} from "discord.js";
-import * as youtubedl from "youtube-dl";
 import * as Promise from "bluebird";
-import * as fs from 'fs';
 import {SearchSongEntity} from "./bilibili-api";
 import {CommandEngine} from "./command-engine";
 import {CommandException} from "./commands/base-command";
-
-let getInfo = Promise.promisify(youtubedl.getInfo);
 
 export class GuildManager {
     logger: Logger;
