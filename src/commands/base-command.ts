@@ -2,7 +2,6 @@ import {Logger, getLogger} from "../logger";
 import {Message} from "discord.js";
 import {GuildManager} from "../guild";
 import {CommandType} from "./command-type";
-import * as Promise from 'bluebird';
 
 export interface Command {
     readonly logger: Logger
@@ -22,9 +21,9 @@ export class BaseCommand implements Command {
         return CommandType.INVALID;
     }
 
-    run(message: Message, guild: GuildManager, args?: string[]): Promise<void> {
+    async run(message: Message, guild: GuildManager, args?: string[]): Promise<void>{
         // Noop
-        return Promise.resolve();
+        return;
     }
 
     helpMessage(): string {

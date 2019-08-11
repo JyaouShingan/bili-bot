@@ -1,6 +1,5 @@
-import {BaseCommand} from "./base-command";
+import {BaseCommand, CommandException} from "./base-command";
 import {CommandType} from "./command-type";
-import * as Promise from "bluebird";
 import {GuildManager} from "../guild";
 import {Message} from "discord.js";
 import * as fs from "fs";
@@ -12,23 +11,25 @@ export class LoadCommand extends BaseCommand {
         return CommandType.LOAD;
     }
 
-    run(message: Message, guild: GuildManager, args?: string[]): Promise<void> {
-        return guild.checkMemberInChannel(message.member).then(() => {
-            if (args.length === 0) {
-                this.logger.info('Loading from default list');
-                this.load(message, guild);
-            } else if (args.length === 1) {
-                this.logger.info(`Loading from ${args[0]}`);
-                this.load(message, guild, args[0]);
-            }
-        });
+    async run(message: Message, guild: GuildManager, args?: string[]): Promise<void> {
+        await guild.checkMemberInChannel(message.member);
+        if (args.length === 0) {
+            this.logger.info('Loading from default list');
+            await this.load(message, guild);
+        } else if (args.length === 1) {
+            this.logger.info(`Loading from ${args[0]}`);
+            await this.load(message, guild, args[0]);
+        } else {
+            throw CommandException.UserPresentable('Too many arguments, expected argument: 1');
+        }
+        message.reply("Finished loading from the playlist");
     }
 
     helpMessage(): string {
         return 'Usage: load <list-name>';
     }
 
-    private load(message: Message, guild: GuildManager, collection?: string) {
+    private async load(message: Message, guild: GuildManager, collection?: string) {
         if (!fs.existsSync('./playlist')) {
             fs.mkdirSync('./playlist');
             message.reply('Nothing here yet');
@@ -42,25 +43,22 @@ export class LoadCommand extends BaseCommand {
         }
 
         const playlistArray = fs.readFileSync(playlistName).toString().split("\n");
+        playlistArray.pop(); // trivial element;
         message.reply('Start loading playlist');
-        for (let index in playlistArray) {
-            if (playlistArray[index] === '') continue;
-            getInfo(playlistArray[index]).then((info) => {
+
+        const promises = playlistArray.map((url) => {
+            return getInfo(url).then((info) => {
                 let song = new BilibiliSong(info, message.author);
                 song.streamer.start();
                 guild.playlist.push(song);
-                if (guild.isPlaying) {
-                    this.logger.info(`Song ${song.title} added to the queue`);
-                } else if (!guild.activeConnection) {
+                if (!guild.activeConnection) {
                     message.member.voice.channel.join().then((connection) => {
                         guild.activeConnection = connection;
                     })
-                } else {
-
                 }
-            }).catch((err) => {
-                if (err) this.logger.info(`Failed loading: ${err}`);
             });
-        }
+        })
+
+        return Promise.all(promises);
     }
 }
