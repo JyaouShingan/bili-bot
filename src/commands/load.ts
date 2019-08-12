@@ -37,11 +37,17 @@ export class LoadCommand extends BaseCommand {
         }
         message.reply("Finished loading from the playlist");
 
+        if (songs.length === 0) {
+            return;
+        }
+
         if (!guild.activeConnection) {
             message.member.voice.channel.join().then((connection) => {
                 guild.activeConnection = connection;
                 guild.playNext();
             })
+        } else {
+            guild.playNext();
         }
     }
 }

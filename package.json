@@ -14,7 +14,7 @@
   "dependencies": {
     "@types/bluebird": "^3.5.27",
     "@types/fluent-ffmpeg": "^2.1.10",
-    "@types/mongodb": "^3.1.32",
+    "@types/mongoose": "^5.5.12",
     "@types/node": "^12.7.0",
     "@types/request": "^2.48.2",
     "@types/request-promise": "^4.1.44",
@@ -22,7 +22,7 @@
     "bluebird": "^3.5.5",
     "discord.js": "github:discordjs/discord.js",
     "fluent-ffmpeg": "^2.1.2",
-    "mongodb": "^3.3.0-beta2",
+    "mongoose": "^5.6.9",
     "node-opus": "^0.3.2",
     "request": "^2.88.0",
     "request-promise": "^4.2.4",

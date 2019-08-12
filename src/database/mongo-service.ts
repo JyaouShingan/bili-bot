@@ -1,25 +1,35 @@
 import {Logger, getLogger} from "../logger";
-import {MongoClient} from "mongodb";
+import {connect, Mongoose} from "mongoose";
 
 class MongoDBService {
     private uri: string = 'mongodb://localhost:27017';
 
     logger: Logger;
-    client: MongoClient;
+    client: Mongoose;
 
     constructor() {
         this.logger = getLogger('MongoDB');
     }
 
-    async start(): Promise<boolean> {
+    async start() {
         try {
-            this.client = await MongoClient.connect(this.uri, {useNewUrlParser: true});
+            this.client = await connect(`${this.uri}/default`, {useNewUrlParser: true});
             this.logger.info('Connected to database');
+            return true
         } catch (error) {
             this.logger.error(`MongoDB connection error: ${error}`);
-            return Promise.resolve(false);
+            return false
         }
-        return this.client.isConnected();
+    }
+
+    async getConnection(database: string) {
+        const existConnection = this.client.connections.find((conn) => {
+            return conn.db.databaseName == database;
+        });
+        if (existConnection) return existConnection;
+        const connection = await this.client.createConnection(`${this.uri}/${database}`, {useNewUrlParser: true});
+        this.logger.info('Connected to database');
+        return connection;
     }
 }
 

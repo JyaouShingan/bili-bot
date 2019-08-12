@@ -1,7 +1,7 @@
 import {BaseCommand} from "./base-command";
 import {CommandType} from "./command-type";
 import {GuildManager} from "../guild";
-import {Message} from "discord.js";
+import {Message, MessageEmbed, User} from "discord.js";
 import * as fs from "fs";
 
 export class SaveCommand extends BaseCommand {
@@ -13,10 +13,10 @@ export class SaveCommand extends BaseCommand {
         guild.checkMemberInChannel(message.member);
         if (args.length === 0) {
             this.logger.info('Saving to default list');
-            await this.save(guild);
+            await this.save(guild, message.author);
         } else if (args.length === 1) {
             this.logger.info(`Saving to ${args[0]}`);
-            await this.save(guild, args[0]);
+            await this.save(guild, message.author, args[0]);
         }
     }
 
@@ -24,37 +24,15 @@ export class SaveCommand extends BaseCommand {
         return 'Usage: save <list-name>';
     }
 
-    async save(guild: GuildManager, collection?: string) {
+    async save(guild: GuildManager, user: User, collection?: string) {
         if (!guild.currentSong) {
             this.logger.warn('No song is playing');
             return;
         }
-        
-        await guild.datasource.saveToPlaylist(guild.currentSong, collection);
 
-        // if (!fs.existsSync('./playlist')) {
-        //     fs.mkdirSync('./playlist');
-        // }
-        //
-        // const playlistName = collection ? `./playlist/${collection}` : './playlist/default';
-        // if (!fs.existsSync(playlistName)) {
-        //     fs.writeFileSync(playlistName, '');
-        // }
-        //
-        // if (!guild.currentSong) {
-        //     this.logger.info('Playlist created');
-        //     return;
-        // }
-        //
-        // const currentFile = fs.readFileSync(playlistName);
-        // if (currentFile.includes(guild.currentSong.url)){
-        //     guild.activeTextChannel.send('Already exists');
-        //     return;
-        // }
-        //
-        // fs.appendFile(playlistName, `${guild.currentSong.url}\n`, (err) => {
-        //     if (err) this.logger.info(err);
-        //     else guild.activeTextChannel.send('Added to playlist');
-        // });
+        await guild.datasource.saveToPlaylist(guild.currentSong, user, collection);
+
+        const playlistDescription = collection ? `playlist "${collection}"` : `default playlist`;
+        guild.activeTextChannel.send(new MessageEmbed().setDescription(`${guild.currentSong.title} saved to ${playlistDescription}`));
     }
 }
