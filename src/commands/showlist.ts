@@ -35,7 +35,7 @@ export class ShowlistCommand extends BaseCommand {
         }
         const songs = playlistArray.map((url) => {
             return getInfo(url).then((info) => {
-                return new BilibiliSong(info, message.author);
+                return BilibiliSong.withInfo(info, message.author);
             });
         });
 

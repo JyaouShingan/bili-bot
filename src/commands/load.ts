@@ -22,7 +22,6 @@ export class LoadCommand extends BaseCommand {
         } else {
             throw CommandException.UserPresentable('Too many arguments, expected argument: 1');
         }
-        message.reply("Finished loading from the playlist");
     }
 
     helpMessage(): string {
@@ -30,35 +29,19 @@ export class LoadCommand extends BaseCommand {
     }
 
     private async load(message: Message, guild: GuildManager, collection?: string) {
-        if (!fs.existsSync('./playlist')) {
-            fs.mkdirSync('./playlist');
-            message.reply('Nothing here yet');
-            return;
-        }
-
-        const playlistName = collection ? `./playlist/${collection}` : './playlist/default';
-        if (!fs.existsSync(playlistName)) {
-            message.reply('The playlist does not exist');
-            return;
-        }
-
-        const playlistArray = fs.readFileSync(playlistName).toString().split("\n");
-        playlistArray.pop(); // trivial element;
         message.reply('Start loading playlist');
+        const songs = await guild.datasource.loadFromPlaylist(message.author, collection);
+        for (const song of songs) {
+            song.streamer.start();
+            guild.playlist.push(song);
+        }
+        message.reply("Finished loading from the playlist");
 
-        const promises = playlistArray.map((url) => {
-            return getInfo(url).then((info) => {
-                let song = new BilibiliSong(info, message.author);
-                song.streamer.start();
-                guild.playlist.push(song);
-                if (!guild.activeConnection) {
-                    message.member.voice.channel.join().then((connection) => {
-                        guild.activeConnection = connection;
-                    })
-                }
-            });
-        })
-
-        return Promise.all(promises);
+        if (!guild.activeConnection) {
+            message.member.voice.channel.join().then((connection) => {
+                guild.activeConnection = connection;
+                guild.playNext();
+            })
+        }
     }
 }

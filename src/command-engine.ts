@@ -7,7 +7,7 @@ import {getLogger, Logger} from "./logger";
 export class CommandEngine {
     guild: GuildManager;
     commands: Map<string, Command>;
-    logger: Logger
+    logger: Logger;
 
     constructor(guild: GuildManager) {
         this.guild = guild;

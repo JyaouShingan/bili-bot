@@ -5,6 +5,7 @@ import * as Promise from "bluebird";
 import {SearchSongEntity} from "./bilibili-api";
 import {CommandEngine} from "./command-engine";
 import {CommandException} from "./commands/base-command";
+import {GuildDataSource} from "./database/guild-datasource";
 
 export class GuildManager {
     logger: Logger;
@@ -19,6 +20,7 @@ export class GuildManager {
     currentShowlistResult: Array<BilibiliSong>;
     commandPrefix: string;
     commandEngine: CommandEngine;
+    datasource: GuildDataSource;
     previousCommand: null | "search" | "showlist";
 
     constructor(id: string, prefix: string = '~') {
@@ -31,6 +33,7 @@ export class GuildManager {
         this.currentSong = null;
         this.commandPrefix = prefix;
         this.commandEngine = new CommandEngine(this);
+        this.datasource = new GuildDataSource(this);
     }
 
     processMessage(msg: Message): void {

@@ -15,17 +15,36 @@ export class BilibiliSong {
     streamer: Streamer;
     uid: string;
 
-    constructor(info: Info, initiator: User) {
-        this.url = info['webpage_url'];
-        this.title = info['title'];
-        this.author = info['uploader'];
-        this.description = info['description'];
-        this.thumbnail = info['thumbnail'];
-        this.rawDuration = info._duration_raw;
-        this.hmsDuration = info._duration_hms;
-        this.initiator = initiator;
-        this.streamer = new Streamer(this);
-        this.uid = uidExtractor(this.url);
+    private constructor() {}
+
+    static withInfo(info: Info, initiator: User) {
+        const song = new BilibiliSong();
+        song.url = info['webpage_url'];
+        song.title = info['title'];
+        song.author = info['uploader'];
+        song.description = info['description'];
+        song.thumbnail = info['thumbnail'];
+        song.rawDuration = info._duration_raw;
+        song.hmsDuration = info._duration_hms;
+        song.initiator = initiator;
+        song.streamer = new Streamer(song);
+        song.uid = uidExtractor(song.url);
+        return song
+    }
+
+    static withRecord(record: object, initiator: User) {
+        const song = new BilibiliSong();
+        song.url = record['url'];
+        song.title = record['title'];
+        song.author = record['author'];
+        song.description = record['description'];
+        song.thumbnail = record['thumbnail'];
+        song.rawDuration = record['rawDuration'];
+        song.hmsDuration = record['hmsDuration'];
+        song.initiator = initiator;
+        song.streamer = new Streamer(song);
+        song.uid = uidExtractor(song.url);
+        return song;
     }
 
     getUrl() {

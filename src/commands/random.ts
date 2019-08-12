@@ -35,7 +35,7 @@ export class RandomCommand extends BaseCommand {
             songInfo = await this.doLocalRandom(message, guild);
         }
 
-        let song = new BilibiliSong(songInfo, message.author);
+        let song = BilibiliSong.withInfo(songInfo, message.author);
         guild.playSong(message, song);
     }
 

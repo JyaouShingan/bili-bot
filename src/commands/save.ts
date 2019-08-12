@@ -25,29 +25,36 @@ export class SaveCommand extends BaseCommand {
     }
 
     save(guild: GuildManager, collection?: string): void {
-        if (!fs.existsSync('./playlist')) {
-            fs.mkdirSync('./playlist');
-        }
-
-        const playlistName = collection ? `./playlist/${collection}` : './playlist/default';
-        if (!fs.existsSync(playlistName)) {
-            fs.writeFileSync(playlistName, '');
-        }
-
         if (!guild.currentSong) {
-            this.logger.info('Playlist created');
+            this.logger.warn('No song is playing');
             return;
         }
 
-        const currentFile = fs.readFileSync(playlistName);
-        if (currentFile.includes(guild.currentSong.url)){
-            guild.activeTextChannel.send('Already exists');
-            return;
-        }
+        guild.datasource.saveToPlaylist(guild.currentSong, collection);
 
-        fs.appendFile(playlistName, `${guild.currentSong.url}\n`, (err) => {
-            if (err) this.logger.info(err);
-            else guild.activeTextChannel.send('Added to playlist');
-        });
+        // if (!fs.existsSync('./playlist')) {
+        //     fs.mkdirSync('./playlist');
+        // }
+        //
+        // const playlistName = collection ? `./playlist/${collection}` : './playlist/default';
+        // if (!fs.existsSync(playlistName)) {
+        //     fs.writeFileSync(playlistName, '');
+        // }
+        //
+        // if (!guild.currentSong) {
+        //     this.logger.info('Playlist created');
+        //     return;
+        // }
+        //
+        // const currentFile = fs.readFileSync(playlistName);
+        // if (currentFile.includes(guild.currentSong.url)){
+        //     guild.activeTextChannel.send('Already exists');
+        //     return;
+        // }
+        //
+        // fs.appendFile(playlistName, `${guild.currentSong.url}\n`, (err) => {
+        //     if (err) this.logger.info(err);
+        //     else guild.activeTextChannel.send('Added to playlist');
+        // });
     }
 }

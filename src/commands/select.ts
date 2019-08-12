@@ -30,7 +30,7 @@ export class SelectCommand extends BaseCommand {
         }
         guild.previousCommand = null;
         const info = await getInfo(searchBase[index].getUrl())
-        const song = new BilibiliSong(info, message.author);
+        const song = BilibiliSong.withInfo(info, message.author);
         guild.playSong(message, song);
     }
 
