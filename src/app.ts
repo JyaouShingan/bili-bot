@@ -5,11 +5,17 @@ import {MongoDB} from "./database/mongo-service";
 
 const logger = getLogger("app.js");
 
-if (!config || !config.discordToken) {
-    logger.error(`Missing botconfig.json or "discordToken" in json`);
+async function main() {
+    if (!config || !config.discordToken) {
+        logger.error(`Missing botconfig.json or "discordToken" in json`);
+    }
+
+    if (await MongoDB.start()) {
+        let bot = new DiscordBot(config.discordToken);
+        bot.run();
+    }
 }
 
-if (MongoDB.start()) {
-    let bot = new DiscordBot(config.discordToken);
-    bot.run();
-}
+(async () => {
+    await main();
+})();
