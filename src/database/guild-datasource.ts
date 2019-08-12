@@ -22,6 +22,7 @@ export class GuildDataSource {
         const listname = playlist || 'default';
         const collection = await this.getPlaylistCollection(listname, true);
         await collection.insertOne({
+            _id: song.uid,
             url: song.url,
             title: song.title,
             author: song.author,
@@ -61,6 +62,7 @@ export class GuildDataSource {
     private async createAndSetupPlaylist(playlist: string) {
         return await this.db.createCollection(`playlist-${playlist}`, {
            'validator': {
+               'uid': {'$type': "string"},
                'url': {'$type': "string"},
                'title': {'$type': "string"},
                'author': {'$type': "string"},

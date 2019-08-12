@@ -28,11 +28,14 @@ export class InfoCommand extends BaseCommand {
         this.logger.info(`Queried song: ${currentSong.title}`);
         let embed = new MessageEmbed()
             .setTitle(currentSong.title)
-            .setDescription(currentSong.description)
             .setFooter(currentSong.hmsDuration)
             .setThumbnail(currentSong.thumbnail)
             .setURL(currentSong.url)
             .setColor(0x00FF00);
+
+        if (currentSong.description.length <= 500) {
+            embed.setDescription(currentSong.description)
+        }
         message.channel.send(embed);
     }
 

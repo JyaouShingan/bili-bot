@@ -1,7 +1,6 @@
 import {Logger, getLogger} from "./logger";
 import {BilibiliSong} from "./bilibili-song";
 import {GuildMember, Message, MessageEmbed, StreamDispatcher, TextChannel, VoiceConnection} from "discord.js";
-import * as Promise from "bluebird";
 import {SearchSongEntity} from "./bilibili-api";
 import {CommandEngine} from "./command-engine";
 import {CommandException} from "./commands/base-command";

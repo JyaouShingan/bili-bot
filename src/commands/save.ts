@@ -13,10 +13,10 @@ export class SaveCommand extends BaseCommand {
         guild.checkMemberInChannel(message.member);
         if (args.length === 0) {
             this.logger.info('Saving to default list');
-            this.save(guild);
+            await this.save(guild);
         } else if (args.length === 1) {
             this.logger.info(`Saving to ${args[0]}`);
-            this.save(guild, args[0]);
+            await this.save(guild, args[0]);
         }
     }
 
@@ -24,13 +24,13 @@ export class SaveCommand extends BaseCommand {
         return 'Usage: save <list-name>';
     }
 
-    save(guild: GuildManager, collection?: string): void {
+    async save(guild: GuildManager, collection?: string) {
         if (!guild.currentSong) {
             this.logger.warn('No song is playing');
             return;
         }
-
-        guild.datasource.saveToPlaylist(guild.currentSong, collection);
+        
+        await guild.datasource.saveToPlaylist(guild.currentSong, collection);
 
         // if (!fs.existsSync('./playlist')) {
         //     fs.mkdirSync('./playlist');
