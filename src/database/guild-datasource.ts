@@ -68,7 +68,7 @@ export class GuildDataSource {
         // Check if playlist exist
         const list = await this.getPlaylist(listname, initiator, false);
         if(!list) {
-            throw CommandException.UserPresentable(`$Playlist "${listname}" does not exist`);
+            throw CommandException.UserPresentable(`Playlist "${listname}" does not exist`);
         }
 
         const songsCursor = this.Song.find({
