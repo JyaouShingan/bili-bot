@@ -1,6 +1,7 @@
 import {Info} from "youtube-dl";
 import {User} from "discord.js";
 import {Streamer} from "./streamer";
+import {uidExtractor} from "./utils/utils";
 
 export class BilibiliSong {
     url: string;
@@ -12,6 +13,7 @@ export class BilibiliSong {
     hmsDuration: string;
     initiator: User;
     streamer: Streamer;
+    uid: string;
 
     constructor(info: Info, initiator: User) {
         this.url = info['webpage_url'];
@@ -23,6 +25,7 @@ export class BilibiliSong {
         this.hmsDuration = info._duration_hms;
         this.initiator = initiator;
         this.streamer = new Streamer(this);
+        this.uid = uidExtractor(this.url);
     }
 
     getUrl() {
