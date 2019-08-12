@@ -47,7 +47,9 @@ export class LoadCommand extends BaseCommand {
                 guild.playNext();
             })
         } else {
-            guild.playNext();
+            if (!guild.isPlaying) {
+                guild.playNext();
+            }
         }
     }
 }
