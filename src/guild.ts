@@ -4,7 +4,7 @@ import {GuildMember, Message, MessageEmbed, StreamDispatcher, TextChannel, Voice
 import {SearchSongEntity} from "./bilibili-api";
 import {CommandEngine} from "./command-engine";
 import {CommandException} from "./commands/base-command";
-import {GuildDataSource} from "./database/guild-datasource";
+import {GuildDataSource} from "./data/guild-datasource";
 
 export class GuildManager {
     logger: Logger;

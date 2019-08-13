@@ -1,5 +1,5 @@
 import {Document, Schema} from "mongoose";
-import {BilibiliSong} from "../bilibili-song";
+import {BilibiliSong} from "../../bilibili-song";
 import {User} from "discord.js";
 
 const songSchema = new Schema({

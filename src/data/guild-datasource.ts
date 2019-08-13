@@ -1,16 +1,15 @@
 import {GuildManager} from "../guild";
-import {MongoDB} from "./mongo-service";
+import MongoDB from "./db/service";
 import {getLogger, Logger} from "../logger";
 import {BilibiliSong} from "../bilibili-song";
 import {CommandException} from "../commands/base-command";
 import {User} from "discord.js";
 import {Connection, Model} from "mongoose";
-import {IPlaylist, ISong, PlaylistSchema, SongSchema} from "./schema";
+import {IPlaylist, ISong, PlaylistSchema, SongSchema} from "./db/schema";
 
 export class GuildDataSource {
     readonly logger: Logger;
     readonly guild: GuildManager;
-    readonly mongoService = MongoDB;
     private db: Connection;
     private Song: Model<ISong>;
     private Playlist: Model<IPlaylist>;
@@ -21,16 +20,14 @@ export class GuildDataSource {
 
     }
 
-    async setupIfNecessary() {
-        if (!this.db) {
-            this.db = await this.mongoService.getConnection(this.guild.id);
-            this.Song = this.db.model('Song', SongSchema);
-            this.Playlist = this.db.model('Playlist', PlaylistSchema);
-        }
+    async setupDb() {
+        this.db = await MongoDB.getConnection(this.guild.id);
+        this.Song = this.db.model('Song', SongSchema);
+        this.Playlist = this.db.model('Playlist', PlaylistSchema);
     }
 
     async saveToPlaylist(song: BilibiliSong, initiator: User, playlist?: string) {
-        await this.setupIfNecessary();
+        if (!this.db) await this.setupDb();
         const listname = playlist || 'default';
 
         const list = await this.getPlaylist(listname, initiator, true);
@@ -61,8 +58,8 @@ export class GuildDataSource {
         this.logger.info(`Song ${song.title} has saved to playlist ${listname}`);
     }
 
-    async loadFromPlaylist(initiator: User, playlist?: string) {
-        await this.setupIfNecessary();
+    async loadFromPlaylist(initiator: User, playlist?: string): Promise<BilibiliSong[]> {
+        if (!this.db) await this.setupDb();
         const listname = playlist || 'default';
 
         // Check if playlist exist
@@ -86,12 +83,12 @@ export class GuildDataSource {
         return songs;
     }
 
-    private async getPlaylist(name: string, user: User, create: boolean = false) {
+    private async getPlaylist(name: string, user: User, create: boolean = false): Promise<IPlaylist> {
         const result = await this.Playlist.findOne({name});
         if (result) {
             return result;
         } else if (create) {
-            return await new this.Playlist({
+            return new this.Playlist({
                 name,
                 creator: user.id,
                 songs: []

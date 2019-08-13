@@ -14,12 +14,11 @@ export class PromoteCommand extends BaseCommand {
             throw CommandException.UserPresentable(this.helpMessage());
         }
 
-        const userIndex = parseInt(args.shift());
-        if (isNaN(userIndex) || !Number.isInteger(userIndex)) {
+        let index = parseInt(args.shift());
+        if (!Number.isInteger(index)) {
             throw CommandException.UserPresentable(this.helpMessage());
         }
-
-        const index = userIndex - 1;
+        index -= 1;
 
         if (index < 0 || index >= guild.playlist.length) {
             throw CommandException.UserPresentable(`The index you entered is out of bounds, please enter a number between ${1} and ${guild.playlist.length}`);

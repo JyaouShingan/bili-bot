@@ -29,17 +29,18 @@ export class LoadCommand extends BaseCommand {
     }
 
     private async load(message: Message, guild: GuildManager, collection?: string) {
-        message.reply('Start loading playlist');
         const songs = await guild.datasource.loadFromPlaylist(message.author, collection);
         for (const song of songs) {
             song.streamer.start();
             guild.playlist.push(song);
         }
-        message.reply("Finished loading from the playlist");
 
         if (songs.length === 0) {
+            message.reply('Playlist is empty');
             return;
         }
+
+        message.reply('Playlist successfully loaded');
 
         if (!guild.activeConnection) {
             message.member.voice.channel.join().then((connection) => {
