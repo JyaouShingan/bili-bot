@@ -1,10 +1,10 @@
 import {Logger, getLogger} from "./logger";
 import {BilibiliSong} from "./bilibili-song";
 import {GuildMember, Message, MessageEmbed, StreamDispatcher, TextChannel, VoiceConnection} from "discord.js";
-import * as Promise from "bluebird";
 import {SearchSongEntity} from "./bilibili-api";
 import {CommandEngine} from "./command-engine";
 import {CommandException} from "./commands/base-command";
+import {GuildDataSource} from "./data/guild-datasource";
 
 export class GuildManager {
     logger: Logger;
@@ -19,6 +19,7 @@ export class GuildManager {
     currentShowlistResult: Array<BilibiliSong>;
     commandPrefix: string;
     commandEngine: CommandEngine;
+    datasource: GuildDataSource;
     previousCommand: null | "search" | "showlist";
 
     constructor(id: string, prefix: string = '~') {
@@ -31,6 +32,7 @@ export class GuildManager {
         this.currentSong = null;
         this.commandPrefix = prefix;
         this.commandEngine = new CommandEngine(this);
+        this.datasource = new GuildDataSource(this);
     }
 
     processMessage(msg: Message): void {
@@ -46,11 +48,15 @@ export class GuildManager {
 
     // HELPER FUNCTIONS
 
+    async joinChannel(message: Message) {
+        this.activeConnection = await message.member.voice.channel.join()
+    }
+
     clearPlaylist() {
         while(this.playlist.length > 0) this.playlist.pop();
     }
 
-    playSong(msg: Message, song: BilibiliSong) {
+    async playSong(msg: Message, song: BilibiliSong) {
         // Add to play list
         song.streamer.start();
         this.playlist.push(song);
@@ -61,10 +67,8 @@ export class GuildManager {
                 .setDescription(`${song.title} is added to playlist, current number of songs in the list: ${this.playlist.length}`);
             this.activeTextChannel.send(embed);
         } else if (!this.activeConnection) {
-            msg.member.voice.channel.join().then((connection) => {
-                this.activeConnection = connection;
-                this.playNext();
-            })
+            await this.joinChannel(msg);
+            this.playNext();
         } else {
             this.playNext();
         }
@@ -73,6 +77,7 @@ export class GuildManager {
     playNext() {
         this.isPlaying = true;
         const currentSong = this.playlist.shift();
+        if (!currentSong.streamer.isLoading) currentSong.streamer.start();
         this.currentSong = currentSong;
         this.logger.info(`Start playing song ${currentSong.title}`);
         this.printPlaying(currentSong);

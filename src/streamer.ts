@@ -15,7 +15,7 @@ export class Streamer {
     ffmpegCommand: Ffmpeg.FfmpegCommand;
     output: PassThrough;
     transferStream: PassStream;
-
+    isLoading: boolean;
 
     constructor(public song: BilibiliSong) {
         const bufferSize = 10 * 1024 * 1024; // 10 mb
@@ -24,9 +24,11 @@ export class Streamer {
         this.ffmpegCommand = Ffmpeg();
         this.output = new PassThrough({highWaterMark: bufferSize});
         this.transferStream = new PassStream({highWaterMark: bufferSize});
+        this.isLoading = false;
     }
 
     start(): Readable {
+        this.isLoading = true;
         let video = ytdl(this.song.url, ['--format=best'], null);
         video.on('info', (info) => {
             this.logger.info(`Start downloading video: ${this.song.title}`);

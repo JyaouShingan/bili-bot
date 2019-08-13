@@ -4,7 +4,7 @@ import {GuildManager} from "../guild";
 import {Message} from "discord.js";
 import * as fs from "fs";
 import {BilibiliSong} from "../bilibili-song";
-import {getInfo} from "../utils/utils";
+import {getInfo, shuffle} from "../utils/utils";
 
 export class LoadCommand extends BaseCommand {
     type(): CommandType {
@@ -15,50 +15,42 @@ export class LoadCommand extends BaseCommand {
         guild.checkMemberInChannel(message.member);
         if (args.length === 0) {
             this.logger.info('Loading from default list');
-            await this.load(message, guild);
+            await LoadCommand.load(message, guild);
         } else if (args.length === 1) {
             this.logger.info(`Loading from ${args[0]}`);
-            await this.load(message, guild, args[0]);
+            await LoadCommand.load(message, guild, args[0]);
         } else {
             throw CommandException.UserPresentable('Too many arguments, expected argument: 1');
         }
-        message.reply("Finished loading from the playlist");
     }
 
     helpMessage(): string {
         return 'Usage: load <list-name>';
     }
 
-    private async load(message: Message, guild: GuildManager, collection?: string) {
-        if (!fs.existsSync('./playlist')) {
-            fs.mkdirSync('./playlist');
-            message.reply('Nothing here yet');
+    private static async load(message: Message, guild: GuildManager, collection?: string) {
+        const songs = await guild.datasource.loadFromPlaylist(message.author, collection);
+        shuffle(songs);
+
+        for (const song of songs) {
+            song.streamer.start();
+            guild.playlist.push(song);
+        }
+
+        if (songs.length === 0) {
+            message.reply('Playlist is empty');
             return;
         }
 
-        const playlistName = collection ? `./playlist/${collection}` : './playlist/default';
-        if (!fs.existsSync(playlistName)) {
-            message.reply('The playlist does not exist');
-            return;
+        message.reply('Playlist successfully loaded');
+
+        if (!guild.activeConnection) {
+            await guild.joinChannel(message);
+            guild.playNext();
+        } else {
+            if (!guild.isPlaying) {
+                guild.playNext();
+            }
         }
-
-        const playlistArray = fs.readFileSync(playlistName).toString().split("\n");
-        playlistArray.pop(); // trivial element;
-        message.reply('Start loading playlist');
-
-        const promises = playlistArray.map((url) => {
-            return getInfo(url).then((info) => {
-                let song = new BilibiliSong(info, message.author);
-                song.streamer.start();
-                guild.playlist.push(song);
-                if (!guild.activeConnection) {
-                    message.member.voice.channel.join().then((connection) => {
-                        guild.activeConnection = connection;
-                    })
-                }
-            });
-        })
-
-        return Promise.all(promises);
     }
 }

@@ -15,11 +15,11 @@ export class SelectCommand extends BaseCommand {
         if (args.length === 0) {
             throw CommandException.UserPresentable(this.helpMessage());
         }
-        const userIndex = parseInt(args.shift());
-        if (isNaN(userIndex) || !Number.isInteger(userIndex)) {
+        let index = parseInt(args.shift());
+        if (!Number.isInteger(index)) {
             throw CommandException.UserPresentable(this.helpMessage());
         }
-        const index = userIndex - 1;
+        index -= 1;
 
         if (!guild.previousCommand) {
             throw CommandException.UserPresentable(`Invalid Operation: Please do ${guild.commandPrefix}search or ${guild.commandPrefix}showlist first`);
@@ -29,9 +29,9 @@ export class SelectCommand extends BaseCommand {
             throw CommandException.UserPresentable(`The index you entered is out of bounds, please enter a number between ${1} and ${searchBase.length}`);
         }
         guild.previousCommand = null;
-        const info = await getInfo(searchBase[index].getUrl())
-        const song = new BilibiliSong(info, message.author);
-        guild.playSong(message, song);
+        const info = await getInfo(searchBase[index].getUrl());
+        const song = BilibiliSong.withInfo(info, message.author);
+        await guild.playSong(message, song);
     }
 
     helpMessage(): string {

@@ -24,48 +24,41 @@ export class RandomCommand extends BaseCommand {
 
     private async doRandom(message: Message, guild: GuildManager, source?: string, category?: string): Promise<void> {
         this.logger.info(`Random request - source: ${source}`);
-        let songInfo: youtubedl.Info;
+        let song: BilibiliSong;
         if (source) {
             if (source == '-b') {
-                songInfo = await this.doBilibiliRandom(message, guild, category);
+                song = await RandomCommand.doBilibiliRandom(message, guild, category);
             } else {
-                songInfo = await this.doLocalRandom(message, guild, source);
+                song = await RandomCommand.doLocalRandom(message, guild, source);
             }
         } else {
-            songInfo = await this.doLocalRandom(message, guild);
+            song = await RandomCommand.doLocalRandom(message, guild);
         }
-
-        let song = new BilibiliSong(songInfo, message.author);
-        guild.playSong(message, song);
+        await guild.playSong(message, song);
     }
 
-    private async doLocalRandom(message: Message, guild: GuildManager, playlist?: string): Promise<youtubedl.Info> {
-        const defaultList = "./playlist/default";
-        const list = playlist ? `./playlist/${playlist}` : defaultList;
-        if (!fs.existsSync(list)) {
-            throw CommandException.UserPresentable('Playlist does not exist');
-        }
-        const playlistArray = fs.readFileSync(list).toString().split("\n");
+    private static async doLocalRandom(message: Message, guild: GuildManager, playlist?: string) {
+        const songs = await guild.datasource.loadFromPlaylist(message.author, playlist);
 
         if (playlist) {
             message.reply(`Random selecting from ${playlist}`);
         } else {
             message.reply('Random selecting from default playlist');
         }
-        const randomIndex = Math.floor(Math.random() * (playlistArray.length - 1));
+        const randomIndex = Math.floor(Math.random() * (songs.length - 1));
 
-        return getInfo(playlistArray[randomIndex]);
+        return songs[randomIndex];
     }
 
-    private async doBilibiliRandom(message: Message, guild: GuildManager, category?:string): Promise<youtubedl.Info> {
+    private static async doBilibiliRandom(message: Message, guild: GuildManager, category?:string) {
         category = category || 'music';
 
-        return api.randomRanking(category, 'all').then((entity) => {
-            let embed = new MessageEmbed()
-                .setTitle('Random result:')
-                .setDescription(`${entity.title} - ${entity.play} plays`);
-            guild.activeTextChannel.send(embed);
-            return getInfo(entity.getUrl());
-        });
+        const entity = await api.randomRanking(category, 'all');
+        let embed = new MessageEmbed()
+            .setTitle('Random result:')
+            .setDescription(`${entity.title} - ${entity.play} plays`);
+        guild.activeTextChannel.send(embed);
+        const info = await getInfo(entity.getUrl());
+        return BilibiliSong.withInfo(info, message.author);
     }
 }

@@ -1,7 +1,6 @@
 import {getLogger} from './logger';
 import * as request from "request-promise";
 import RandomMapping from './const/random-mapping';
-import * as Promise from 'bluebird';
 
 const logger = getLogger('BilibiliApi');
 const apiBaseUrl = "https://api.imjad.cn/bilibili/v2";
@@ -37,7 +36,7 @@ export class SearchSongEntity {
     }
 }
 
-export function search(keyword: string, limit?: number): Promise<SearchSongEntity[]> {
+export async function search(keyword: string, limit?: number) {
     let params = {
         get: "search",
         keyword,
@@ -49,24 +48,23 @@ export function search(keyword: string, limit?: number): Promise<SearchSongEntit
         qs: params,
         json: true
     };
-    return request(req).then((res) => {
-        const rawSongs = res['data']['items']['archive'] as object[];
 
-        if (!rawSongs) return [];
-        return rawSongs.map((raw) => {
-            return new SearchSongEntity()
-                .setTitle(raw['title'])
-                .setAuthor(raw['author'])
-                .setVideoId(raw['param'])
-                .setPlay(raw['play']);
-        });
+    const response = await request(req);
+    const rawSongs = response['data']['items']['archive'] as object[];
+    if (!rawSongs) return [];
+    return rawSongs.map((raw) => {
+        return new SearchSongEntity()
+            .setTitle(raw['title'])
+            .setAuthor(raw['author'])
+            .setVideoId(raw['param'])
+            .setPlay(raw['play']);
     });
 }
 
-export function randomRanking(
+export async function randomRanking(
     catagory: string,
     type: string,
-): Promise<SearchSongEntity> {
+) {
     const content = RandomMapping[catagory] || 1;
     const params = {
         get: "rank",
@@ -79,15 +77,15 @@ export function randomRanking(
         qs: params,
         json: true
     };
-    return request(req).then((res) => {
-        const rawSongs = res['rank']['list'];
-        const randomIndex = Math.floor(Math.random() * rawSongs.length);
-        const raw = rawSongs[randomIndex];
-        logger.info(`Random result av${raw["aid"]} selected from Bilibili`);
-        return new SearchSongEntity()
-            .setTitle(raw['title'])
-            .setAuthor(raw['author'])
-            .setVideoId(raw['aid'])
-            .setPlay(raw['play']);
-    });
+
+    const response = await request(req);
+    const rawSongs = response['rank']['list'];
+    const randomIndex = Math.floor(Math.random() * rawSongs.length);
+    const raw = rawSongs[randomIndex];
+    logger.info(`Random result av${raw["aid"]} selected from Bilibili`);
+    return new SearchSongEntity()
+        .setTitle(raw['title'])
+        .setAuthor(raw['author'])
+        .setVideoId(raw['aid'])
+        .setPlay(raw['play']);
 }
