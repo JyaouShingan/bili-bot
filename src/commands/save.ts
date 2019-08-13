@@ -16,6 +16,10 @@ export class SaveCommand extends BaseCommand {
         } else if (args.length === 1) {
             this.logger.info(`Saving to ${args[0]}`);
             await this.save(guild, message.author, args[0]);
+        } else if (args[0] == '-d') {
+            this.logger.info(`Saving to ${args[0]} and Default playlist`);
+            await this.save(guild, message.author);
+            await this.save(guild, message.author, args[1]);
         }
     }
 
