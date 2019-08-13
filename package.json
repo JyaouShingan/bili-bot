@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "compile": "node_modules/typescript/bin/tsc",
+    "lint": "eslint . --ext .ts",
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "npm run compile && node built/src/app.js"
   },
@@ -19,6 +20,7 @@
     "@types/request": "^2.48.2",
     "@types/request-promise": "^4.1.44",
     "@types/youtube-dl": "^1.12.2",
+    "@typescript-eslint/parser": "^1.13.0",
     "bluebird": "^3.5.5",
     "discord.js": "github:discordjs/discord.js",
     "fluent-ffmpeg": "^2.1.2",
@@ -29,5 +31,9 @@
     "typescript": "^3.5.3",
     "winston": "^3.2.1",
     "youtube-dl": "^2.0.0"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^1.13.0",
+    "eslint": "^6.1.0"
   }
 }
