@@ -22,6 +22,7 @@ Make sure ffmpeg executable is in system `PATH` environment variable
 
 On macOS:
 ```bash
+brew tap mongodb/brew
 brew install mongodb-community
 brew services start mongodb-community
 ```
