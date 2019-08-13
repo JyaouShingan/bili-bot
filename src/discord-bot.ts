@@ -5,30 +5,32 @@ import {GuildManager} from "./guild";
 
 
 export class DiscordBot {
-    logger: Logger;
-    client: Client;
-    guilds: Map<string, GuildManager>;
+    private token: string;
+    private logger: Logger;
+    private client: Client;
+    private guilds: Map<string, GuildManager>;
 
-    constructor(public token: string) {
+    public constructor(token: string) {
         this.logger = getLogger('DiscordBot');
+        this.token = token;
         this.client = new Client();
         this.token = token;
         this.guilds = new Map<string, GuildManager>();
     }
 
-    run() {
+    public run(): void {
         this.client.login(this.token);
-        this.client.on('ready', () => { this.clientReady() });
-        this.client.on('message', (msg) => { this.handleMessage(msg) });
+        this.client.on('ready', (): void => { this.clientReady() });
+        this.client.on('message', (msg): void => { this.handleMessage(msg) });
     }
 
-    clientReady() {
+    private clientReady(): void {
         this.logger.info(`BiliBot logged in as ${this.client.user.username}`);
     }
 
-    handleMessage(msg: Message) {
+    private handleMessage(msg: Message): void {
         if (!msg.guild) return;
-        let guildId = msg.guild.id;
+        const guildId = msg.guild.id;
         if (!this.guilds.has(guildId)) {
             this.guilds.set(guildId, new GuildManager(guildId));
         }

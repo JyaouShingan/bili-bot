@@ -2,16 +2,13 @@ import {BaseCommand} from "./base-command";
 import {CommandType} from "./command-type";
 import {GuildManager} from "../guild";
 import {Message, MessageEmbed} from "discord.js";
-import * as fs from "fs";
-import {BilibiliSong} from "../bilibili-song";
-import {getInfo} from "../utils/utils";
 
 export class ShowlistCommand extends BaseCommand {
-    type(): CommandType {
+    public type(): CommandType {
         return CommandType.SHOWLIST;
     }
 
-    async run(message: Message, guild: GuildManager, args?: string[]): Promise<void> {
+    public async run(message: Message, guild: GuildManager, args?: string[]): Promise<void> {
         guild.checkMemberInChannel(message.member);
         const playlist = args[0] || 'default';
 
@@ -23,21 +20,21 @@ export class ShowlistCommand extends BaseCommand {
             return;
         }
 
-        guild.currentShowlistResult = songs;
+        guild.setCurrentShowlistResult(songs);
 
-        const resultMessage = guild.currentShowlistResult.map((song, index) => {
+        const resultMessage = guild.currentShowlistResult.map((song, index): string => {
             return `${index + 1}. ${song.author} - ${song.title}`;
         });
 
-        let embed = new MessageEmbed()
+        const embed = new MessageEmbed()
             .setTitle('Songs in this playlist:')
             .setDescription(resultMessage)
             .setFooter(`Use ${guild.commandPrefix}select [number] to play a song`);
         guild.activeTextChannel.send(embed);
-        guild.previousCommand = "showlist";
+        guild.setPreviousCommand("showlist");
     }
 
-    helpMessage(): string {
+    public helpMessage(): string {
         return 'Usage: showlist <list-name>';
     }
 }

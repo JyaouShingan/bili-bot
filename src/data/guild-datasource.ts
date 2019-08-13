@@ -5,28 +5,27 @@ import {BilibiliSong} from "../bilibili-song";
 import {CommandException} from "../commands/base-command";
 import {User} from "discord.js";
 import {Connection, Model} from "mongoose";
-import {IPlaylist, ISong, PlaylistSchema, SongSchema} from "./db/schema";
+import {PlaylistDoc, SongDoc, PlaylistSchema, SongSchema} from "./db/schema";
 
 export class GuildDataSource {
-    readonly logger: Logger;
-    readonly guild: GuildManager;
+    protected readonly logger: Logger;
+    private readonly guild: GuildManager;
     private db: Connection;
-    private Song: Model<ISong>;
-    private Playlist: Model<IPlaylist>;
+    private Song: Model<SongDoc>;
+    private Playlist: Model<PlaylistDoc>;
 
-    constructor(guild: GuildManager) {
+    public constructor(guild: GuildManager) {
         this.logger = getLogger(`GuildDataSource-${guild.id}`);
         this.guild = guild;
-
     }
 
-    async setupDb() {
+    private async setupDb(): Promise<void> {
         this.db = await MongoDB.getConnection(this.guild.id);
         this.Song = this.db.model('Song', SongSchema);
         this.Playlist = this.db.model('Playlist', PlaylistSchema);
     }
 
-    async saveToPlaylist(song: BilibiliSong, initiator: User, playlist?: string) {
+    public async saveToPlaylist(song: BilibiliSong, initiator: User, playlist?: string): Promise<void> {
         if (!this.db) await this.setupDb();
         const listname = playlist || 'default';
 
@@ -58,7 +57,7 @@ export class GuildDataSource {
         this.logger.info(`Song ${song.title} has saved to playlist ${listname}`);
     }
 
-    async loadFromPlaylist(initiator: User, playlist?: string): Promise<BilibiliSong[]> {
+    public async loadFromPlaylist(initiator: User, playlist?: string): Promise<BilibiliSong[]> {
         if (!this.db) await this.setupDb();
         const listname = playlist || 'default';
 
@@ -74,7 +73,7 @@ export class GuildDataSource {
 
         // Get all songs
         const songs: BilibiliSong[] = [];
-        let songDoc: ISong;
+        let songDoc: SongDoc;
         while((songDoc = await songsCursor.next())) {
             songs.push(songDoc.toSong(initiator));
         }
@@ -83,7 +82,7 @@ export class GuildDataSource {
         return songs;
     }
 
-    private async getPlaylist(name: string, user: User, create: boolean = false): Promise<IPlaylist> {
+    private async getPlaylist(name: string, user: User, create: boolean = false): Promise<PlaylistDoc> {
         const result = await this.Playlist.findOne({name});
         if (result) {
             return result;

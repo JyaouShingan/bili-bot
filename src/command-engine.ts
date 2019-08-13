@@ -5,20 +5,20 @@ import {Message} from "discord.js";
 import {getLogger, Logger} from "./logger";
 
 export class CommandEngine {
-    guild: GuildManager;
-    commands: Map<string, Command>;
-    logger: Logger;
+    protected guild: GuildManager;
+    protected commands: Map<string, Command>;
+    protected logger: Logger;
 
-    constructor(guild: GuildManager) {
+    public constructor(guild: GuildManager) {
         this.guild = guild;
         this.commands = Commands;
         this.logger = getLogger('CommandEngine');
     }
 
-    process(msg: Message, args: string[]) {
+    public process(msg: Message, args: string[]): void {
         const command = args.shift();
         if (this.commands.has(command)) {
-            this.commands.get(command).run(msg, this.guild, args).catch((error) => {
+            this.commands.get(command).run(msg, this.guild, args).catch((error): void => {
                 this.logger.error(error);
                 if (error instanceof CommandException && (error as CommandException).userPresentable) {
                     msg.reply(`Command failed: ${error}`);

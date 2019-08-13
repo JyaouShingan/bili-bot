@@ -4,11 +4,11 @@ import {Message} from "discord.js";
 import {GuildManager} from "../guild";
 
 export class PauseCommand extends BaseCommand {
-    type(): CommandType {
+    public type(): CommandType {
         return CommandType.PAUSE;
     }
 
-    async run(message: Message, guild: GuildManager, args?: string[]): Promise<void> {
+    public async run(message: Message, guild: GuildManager, _args?: string[]): Promise<void> {
         guild.checkMemberInChannel(message.member);
         if (guild.activeDispatcher) {
             guild.activeDispatcher.pause();
@@ -16,7 +16,7 @@ export class PauseCommand extends BaseCommand {
         }
     }
 
-    helpMessage(): string {
+    public helpMessage(): string {
         return 'Usage: pause';
     }
 }

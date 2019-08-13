@@ -2,16 +2,14 @@ import {BaseCommand, CommandException} from "./base-command";
 import {CommandType} from "./command-type";
 import {GuildManager} from "../guild";
 import {Message} from "discord.js";
-import * as fs from "fs";
-import {BilibiliSong} from "../bilibili-song";
-import {getInfo, shuffle} from "../utils/utils";
+import {shuffle} from "../utils/utils";
 
 export class LoadCommand extends BaseCommand {
-    type(): CommandType {
+    public type(): CommandType {
         return CommandType.LOAD;
     }
 
-    async run(message: Message, guild: GuildManager, args?: string[]): Promise<void> {
+    public async run(message: Message, guild: GuildManager, args?: string[]): Promise<void> {
         guild.checkMemberInChannel(message.member);
         if (args.length === 0) {
             this.logger.info('Loading from default list');
@@ -24,11 +22,11 @@ export class LoadCommand extends BaseCommand {
         }
     }
 
-    helpMessage(): string {
+    public helpMessage(): string {
         return 'Usage: load <list-name>';
     }
 
-    private static async load(message: Message, guild: GuildManager, collection?: string) {
+    private static async load(message: Message, guild: GuildManager, collection?: string): Promise<void> {
         const songs = await guild.datasource.loadFromPlaylist(message.author, collection);
         shuffle(songs);
 

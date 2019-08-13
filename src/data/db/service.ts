@@ -1,14 +1,14 @@
 import {Logger, getLogger} from "../../logger";
 import * as config from "../../../botconfig.json";
-import {connect, Mongoose} from "mongoose";
+import {connect, Connection, Mongoose} from "mongoose";
 
 class MongoDBService {
-    private uri: string;
+    private readonly uri: string;
 
-    logger: Logger;
-    client: Mongoose;
+    protected readonly logger: Logger;
+    private client: Mongoose;
 
-    constructor() {
+    public constructor() {
         this.logger = getLogger('MongoDB');
         if (!config || !config['mongoUri']) {
             this.logger.error(`Missing botconfig.json or "mongoUri" in json`);
@@ -16,7 +16,7 @@ class MongoDBService {
         this.uri = config['mongoUri'];
     }
 
-    async start() {
+    public async start(): Promise<boolean> {
         try {
             this.client = await connect(`${this.uri}/default`, {useNewUrlParser: true});
             this.logger.info('Connected to default');
@@ -27,8 +27,8 @@ class MongoDBService {
         }
     }
 
-    async getConnection(database: string) {
-        const existConnection = this.client.connections.find((conn) => {
+    public async getConnection(database: string): Promise<Connection> {
+        const existConnection = this.client.connections.find((conn): boolean => {
             return conn.db.databaseName == database;
         });
         if (existConnection) return existConnection;

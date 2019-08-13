@@ -1,24 +1,22 @@
-import {BaseCommand, CommandException} from "./base-command";
+import {BaseCommand} from "./base-command";
 import {CommandType} from "./command-type";
 import {GuildManager} from "../guild";
 import {Message, MessageEmbed} from "discord.js";
 import * as api from "../bilibili-api";
-import * as fs from "fs";
 import {BilibiliSong} from "../bilibili-song";
 import {getInfo} from "../utils/utils";
-import * as youtubedl from "youtube-dl";
 
 export class RandomCommand extends BaseCommand {
-    type(): CommandType {
+    public type(): CommandType {
         return CommandType.RANDOM;
     }
 
-    async run(message: Message, guild: GuildManager, args?: string[]): Promise<void> {
+    public async run(message: Message, guild: GuildManager, args?: string[]): Promise<void> {
         guild.checkMemberInChannel(message.member);
         await this.doRandom(message, guild, args[0], args[1]);
     }
 
-    helpMessage(): string {
+    public helpMessage(): string {
         return 'random <playlist|-b> <category>';
     }
 
@@ -37,7 +35,7 @@ export class RandomCommand extends BaseCommand {
         await guild.playSong(message, song);
     }
 
-    private static async doLocalRandom(message: Message, guild: GuildManager, playlist?: string) {
+    private static async doLocalRandom(message: Message, guild: GuildManager, playlist?: string): Promise<BilibiliSong> {
         const songs = await guild.datasource.loadFromPlaylist(message.author, playlist);
 
         if (playlist) {
@@ -50,11 +48,11 @@ export class RandomCommand extends BaseCommand {
         return songs[randomIndex];
     }
 
-    private static async doBilibiliRandom(message: Message, guild: GuildManager, category?:string) {
+    private static async doBilibiliRandom(message: Message, guild: GuildManager, category?: string): Promise<BilibiliSong> {
         category = category || 'music';
 
         const entity = await api.randomRanking(category, 'all');
-        let embed = new MessageEmbed()
+        const embed = new MessageEmbed()
             .setTitle('Random result:')
             .setDescription(`${entity.title} - ${entity.play} plays`);
         guild.activeTextChannel.send(embed);

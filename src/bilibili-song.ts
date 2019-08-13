@@ -4,16 +4,16 @@ import {Streamer} from "./streamer";
 import {uidExtractor} from "./utils/utils";
 
 export class BilibiliSong {
-    readonly url: string;
-    readonly title: string;
-    readonly author: string;
-    readonly description: string;
-    readonly thumbnail: string;
-    readonly rawDuration: number;
-    readonly hmsDuration: string;
-    readonly initiator: User;
-    readonly streamer: Streamer;
-    readonly uid: string;
+    public readonly url: string;
+    public readonly title: string;
+    public readonly author: string;
+    public readonly description: string;
+    public readonly thumbnail: string;
+    public readonly rawDuration: number;
+    public readonly hmsDuration: string;
+    public readonly initiator: User;
+    public readonly streamer: Streamer;
+    public readonly uid: string;
 
     private constructor(
         url: string,
@@ -37,7 +37,7 @@ export class BilibiliSong {
         this.streamer = new Streamer(this);
     }
 
-    static withInfo(info: Info, initiator: User) {
+    public static withInfo(info: Info, initiator: User): BilibiliSong {
         return new BilibiliSong(
             info['webpage_url'],
             info['title'],
@@ -51,7 +51,7 @@ export class BilibiliSong {
         )
     }
 
-    static withRecord(record: object, initiator: User) {
+    public static withRecord(record: object, initiator: User): BilibiliSong {
         return new BilibiliSong(
             record['url'],
             record['title'],
@@ -65,7 +65,7 @@ export class BilibiliSong {
         );
     }
 
-    getUrl() {
+    public getUrl(): string {
         return this.url;
     }
 }

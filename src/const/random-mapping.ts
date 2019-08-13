@@ -6,7 +6,7 @@ const RandomMapping = {
     "game": 4,
     "tech": 36,
     "hzh": 119,
-}
+};
 
 Object.freeze(RandomMapping);
 

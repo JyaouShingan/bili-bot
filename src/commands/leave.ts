@@ -4,11 +4,11 @@ import {GuildManager} from "../guild";
 import {Message} from "discord.js";
 
 export class LeaveCommand extends BaseCommand {
-    type(): CommandType {
+    public type(): CommandType {
         return CommandType.LEAVE;
     }
 
-    async run(message: Message, guild: GuildManager, args?: string[]): Promise<void> {
+    public async run(message: Message, guild: GuildManager, _args?: string[]): Promise<void> {
         guild.checkMemberInChannel(message.member);
         if (!guild.activeConnection) return;
         guild.activeConnection.disconnect();
@@ -18,7 +18,7 @@ export class LeaveCommand extends BaseCommand {
         guild.clearPlaylist();
     }
 
-    helpMessage(): string {
+    public helpMessage(): string {
         return 'Usage: leave';
     }
 }
