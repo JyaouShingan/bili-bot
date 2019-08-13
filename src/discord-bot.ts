@@ -5,7 +5,7 @@ import {GuildManager} from "./guild";
 
 
 export class DiscordBot {
-    private token: string;
+    private readonly token: string;
     private logger: Logger;
     private client: Client;
     private guilds: Map<string, GuildManager>;
@@ -20,8 +20,12 @@ export class DiscordBot {
 
     public run(): void {
         this.client.login(this.token);
-        this.client.on('ready', (): void => { this.clientReady() });
-        this.client.on('message', (msg): void => { this.handleMessage(msg) });
+        this.client.on('ready', (): void => {
+            this.clientReady()
+        });
+        this.client.on('message', (msg): void => {
+            this.handleMessage(msg)
+        });
     }
 
     private clientReady(): void {
