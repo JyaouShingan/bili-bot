@@ -4,11 +4,11 @@ import {GuildManager} from "../guild";
 import {Message} from "discord.js";
 
 export class StopCommand extends BaseCommand {
-    type(): CommandType {
+    public type(): CommandType {
         return CommandType.STOP;
     }
 
-    async run(message: Message, guild: GuildManager, args?: string[]): Promise<void> {
+    public async run(message: Message, guild: GuildManager, _args?: string[]): Promise<void> {
         guild.checkMemberInChannel(message.member);
         if (!guild.isPlaying) {
             throw CommandException.UserPresentable("I'm not currently playing");
@@ -21,7 +21,7 @@ export class StopCommand extends BaseCommand {
         }
     }
 
-    helpMessage(): string {
+    public helpMessage(): string {
         return 'Usage: stop';
     }
 }

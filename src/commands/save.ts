@@ -2,14 +2,13 @@ import {BaseCommand} from "./base-command";
 import {CommandType} from "./command-type";
 import {GuildManager} from "../guild";
 import {Message, MessageEmbed, User} from "discord.js";
-import * as fs from "fs";
 
 export class SaveCommand extends BaseCommand {
-    type(): CommandType {
+    public type(): CommandType {
         return CommandType.SAVE;
     }
 
-    async run(message: Message, guild: GuildManager, args?: string[]): Promise<void> {
+    public async run(message: Message, guild: GuildManager, args?: string[]): Promise<void> {
         guild.checkMemberInChannel(message.member);
         if (args.length === 0) {
             this.logger.info('Saving to default list');
@@ -20,11 +19,11 @@ export class SaveCommand extends BaseCommand {
         }
     }
 
-    helpMessage(): string {
+    public helpMessage(): string {
         return 'Usage: save <list-name>';
     }
 
-    async save(guild: GuildManager, user: User, collection?: string) {
+    private async save(guild: GuildManager, user: User, collection?: string): Promise<void> {
         if (!guild.currentSong) {
             this.logger.warn('No song is playing');
             return;

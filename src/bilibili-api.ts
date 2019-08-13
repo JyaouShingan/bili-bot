@@ -6,44 +6,44 @@ const logger = getLogger('BilibiliApi');
 const apiBaseUrl = "https://api.imjad.cn/bilibili/v2";
 
 export class SearchSongEntity {
-    title: string;
-    videoId: string;
-    author: string;
-    play: number;
+    public title: string;
+    public videoId: string;
+    public author: string;
+    public play: number;
 
-    setTitle(title: string): this {
+    public setTitle(title: string): this {
         this.title = title;
         return this;
     }
 
-    setVideoId(id: string): this {
+    public setVideoId(id: string): this {
         this.videoId = id;
         return this;
     }
 
-    setAuthor(author: string): this {
+    public setAuthor(author: string): this {
         this.author = author;
         return this;
     }
 
-    setPlay(play: number): this {
+    public setPlay(play: number): this {
         this.play = play;
         return this;
     }
 
-    getUrl(): string {
+    public getUrl(): string {
         return `https://www.bilibili.com/video/av${this.videoId}`;
     }
 }
 
-export async function search(keyword: string, limit?: number) {
-    let params = {
+export async function search(keyword: string, limit?: number): Promise<SearchSongEntity[]> {
+    const params = {
         get: "search",
         keyword,
     };
     if (limit) params['pagesize'] = limit;
 
-    let req = {
+    const req = {
         uri: apiBaseUrl,
         qs: params,
         json: true
@@ -52,7 +52,7 @@ export async function search(keyword: string, limit?: number) {
     const response = await request(req);
     const rawSongs = response['data']['items']['archive'] as object[];
     if (!rawSongs) return [];
-    return rawSongs.map((raw) => {
+    return rawSongs.map((raw): SearchSongEntity => {
         return new SearchSongEntity()
             .setTitle(raw['title'])
             .setAuthor(raw['author'])
@@ -64,7 +64,7 @@ export async function search(keyword: string, limit?: number) {
 export async function randomRanking(
     catagory: string,
     type: string,
-) {
+): Promise<SearchSongEntity> {
     const content = RandomMapping[catagory] || 1;
     const params = {
         get: "rank",
@@ -72,7 +72,7 @@ export async function randomRanking(
         content,
     };
 
-    let req = {
+    const req = {
         uri: apiBaseUrl,
         qs: params,
         json: true

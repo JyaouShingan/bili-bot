@@ -4,11 +4,11 @@ import {GuildManager} from "../guild";
 import {Message} from "discord.js";
 
 export class NextCommand extends BaseCommand {
-    type(): CommandType {
+    public type(): CommandType {
         return CommandType.NEXT;
     }
 
-    async run(message: Message, guild: GuildManager, args?: string[]): Promise<void> {
+    public async run(message: Message, guild: GuildManager, _args?: string[]): Promise<void> {
         guild.checkMemberInChannel(message.member);
         if (guild.playlist.length === 0) {
             throw CommandException.UserPresentable('Current playlist is empty');
@@ -20,7 +20,7 @@ export class NextCommand extends BaseCommand {
         }
     }
 
-    helpMessage(): string {
+    public helpMessage(): string {
         return 'Usage: next';
     }
 }

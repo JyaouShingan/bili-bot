@@ -4,18 +4,18 @@ import {GuildManager} from "../guild";
 import {Message, MessageEmbed} from "discord.js";
 
 export class ListCommand extends BaseCommand {
-    type(): CommandType {
+    public type(): CommandType {
         return CommandType.LIST;
     }
 
-    async run(message: Message, guild: GuildManager, args?: string[]): Promise<void> {
+    public async run(message: Message, guild: GuildManager, _args?: string[]): Promise<void> {
         guild.checkMemberInChannel(message.member);
         if (guild.playlist.length === 0) {
             const embed = new MessageEmbed()
                 .setDescription(`Pending playlist is empty`);
             guild.activeTextChannel.send(embed);
         } else {
-            const playlistMessage = guild.playlist.map((song, index) => {
+            const playlistMessage = guild.playlist.map((song, index): string => {
                 return `${index + 1}. ${song.title} [${song.initiator.toString()}]`;
             }).join('\n');
             const embed = new MessageEmbed()
@@ -25,7 +25,7 @@ export class ListCommand extends BaseCommand {
         }
     }
 
-    helpMessage(): string {
+    public helpMessage(): string {
         return 'Usage: list';
     }
 }

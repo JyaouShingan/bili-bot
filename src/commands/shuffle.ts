@@ -5,18 +5,18 @@ import {Message, MessageEmbed} from "discord.js";
 import {shuffle} from "../utils/utils";
 
 export class ShuffleCommand extends BaseCommand {
-    type(): CommandType {
+    public type(): CommandType {
         return CommandType.SHUFFLE;
     }
 
-    async run(message: Message, guild: GuildManager, args?: string[]): Promise<void> {
+    public async run(message: Message, guild: GuildManager, _args?: string[]): Promise<void> {
         guild.checkMemberInChannel(message.member);
         if (!guild.isPlaying) return;
         shuffle(guild.playlist);
         message.channel.send(new MessageEmbed().setDescription('Playlist shuffled'));
     }
 
-    helpMessage(): string {
+    public helpMessage(): string {
         return 'Usage: shuffle'
     }
 }

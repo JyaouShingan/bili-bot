@@ -6,11 +6,11 @@ import {getInfo} from "../utils/utils";
 import {BilibiliSong} from "../bilibili-song";
 
 export class SelectCommand extends BaseCommand {
-    type(): CommandType {
+    public type(): CommandType {
         return CommandType.SELECT;
     }
 
-    async run(message: Message, guild: GuildManager, args?: string[]): Promise<void> {
+    public async run(message: Message, guild: GuildManager, args?: string[]): Promise<void> {
         guild.checkMemberInChannel(message.member);
         if (args.length === 0) {
             throw CommandException.UserPresentable(this.helpMessage());
@@ -24,7 +24,7 @@ export class SelectCommand extends BaseCommand {
         if (!guild.previousCommand) {
             throw CommandException.UserPresentable(`Invalid Operation: Please do ${guild.commandPrefix}search or ${guild.commandPrefix}showlist first`);
         }
-        let searchBase = guild.previousCommand == "search" ? guild.currentSearchResult : guild.currentShowlistResult;
+        const searchBase = guild.previousCommand == "search" ? guild.currentSearchResult : guild.currentShowlistResult;
         if (index < 0 || index >= searchBase.length) {
             throw CommandException.UserPresentable(`The index you entered is out of bounds, please enter a number between ${1} and ${searchBase.length}`);
         }
@@ -34,7 +34,7 @@ export class SelectCommand extends BaseCommand {
         await guild.playSong(message, song);
     }
 
-    helpMessage(): string {
+    public helpMessage(): string {
         return 'Usage: select [result-index]';
     }
 }

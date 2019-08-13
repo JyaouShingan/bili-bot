@@ -6,11 +6,11 @@ import {BilibiliSong} from "../bilibili-song";
 import * as utils from "../utils/utils";
 
 export class InfoCommand extends BaseCommand {
-    type(): CommandType {
+    public type(): CommandType {
         return CommandType.INFO;
     }
 
-    async run(message: Message, guild: GuildManager, args?: string[]): Promise<void> {
+    public async run(message: Message, guild: GuildManager, args?: string[]): Promise<void> {
         if (args.length === 0) {
             guild.checkMemberInChannel(message.member);
             this.processResult(message, guild, null);
@@ -26,7 +26,7 @@ export class InfoCommand extends BaseCommand {
             throw CommandException.UserPresentable('Invalid command');
         }
         this.logger.info(`Queried song: ${currentSong.title}`);
-        let embed = new MessageEmbed()
+        const embed = new MessageEmbed()
             .setTitle(currentSong.title)
             .setFooter(currentSong.hmsDuration)
             .setThumbnail(currentSong.thumbnail)
@@ -39,7 +39,7 @@ export class InfoCommand extends BaseCommand {
         message.channel.send(embed);
     }
 
-    helpMessage(): string {
+    public helpMessage(): string {
         return 'Usage: info <video-url>';
     }
 }

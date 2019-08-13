@@ -4,11 +4,11 @@ import {GuildManager} from "../guild";
 import {Message, MessageEmbed} from "discord.js";
 
 export class PromoteCommand extends BaseCommand {
-    type(): CommandType {
+    public type(): CommandType {
         return CommandType.PROMOTE;
     }
 
-    async run(message: Message, guild: GuildManager, args?: string[]): Promise<void> {
+    public async run(message: Message, guild: GuildManager, args?: string[]): Promise<void> {
         guild.checkMemberInChannel(message.member);
         if (args.length === 0) {
             throw CommandException.UserPresentable(this.helpMessage());
@@ -35,7 +35,7 @@ export class PromoteCommand extends BaseCommand {
         message.react("🐲");
     }
 
-    helpMessage(): string {
+    public helpMessage(): string {
         return 'Usage: promote [index]';
     }
 }

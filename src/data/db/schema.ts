@@ -13,7 +13,7 @@ const songSchema = new Schema({
     thumbnail: String
 });
 
-songSchema.method('toSong', function (initiator: User) {
+songSchema.method('toSong', function (initiator: User): BilibiliSong {
     return BilibiliSong.withRecord(this, initiator)
 });
 
@@ -28,22 +28,22 @@ const playlistSchema = new Schema({
     }
 });
 
-export interface ISong extends Document {
-    uid: string
-    url: string
-    title: string
-    author: string
-    hmsDuration: string
-    rawDuration: number
-    description: string|null
-    thumbnail: string|null
-    toSong(initiator: User): BilibiliSong
+export interface SongDoc extends Document {
+    uid: string;
+    url: string;
+    title: string;
+    author: string;
+    hmsDuration: string;
+    rawDuration: number;
+    description: string|null;
+    thumbnail: string|null;
+    toSong(initiator: User): BilibiliSong;
 }
 
-export interface IPlaylist extends Document {
-    name: string
-    creator: string
-    songs: Schema.Types.ObjectId[]
+export interface PlaylistDoc extends Document {
+    name: string;
+    creator: string;
+    songs: Schema.Types.ObjectId[];
 }
 
 export const SongSchema = songSchema;

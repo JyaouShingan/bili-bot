@@ -5,21 +5,23 @@ import {Logger, getLogger} from "./logger";
 import * as Ffmpeg from "fluent-ffmpeg";
 
 class PassStream extends PassThrough {
-    close() {}
-    path: string;
-    bytesWritten: number;
+    public close(): void {}
+    public path: string;
+    public bytesWritten: number;
 }
 
 export class Streamer {
-    logger: Logger;
-    ffmpegCommand: Ffmpeg.FfmpegCommand;
-    output: PassThrough;
-    transferStream: PassStream;
-    isLoading: boolean;
+    protected song: BilibiliSong;
+    protected logger: Logger;
+    protected ffmpegCommand: Ffmpeg.FfmpegCommand;
+    protected output: PassThrough;
+    protected transferStream: PassStream;
+    public isLoading: boolean;
 
-    constructor(public song: BilibiliSong) {
+    public constructor(song: BilibiliSong) {
         const bufferSize = 10 * 1024 * 1024; // 10 mb
 
+        this.song = song;
         this.logger = getLogger("Streamer");
         this.ffmpegCommand = Ffmpeg();
         this.output = new PassThrough({highWaterMark: bufferSize});
@@ -27,13 +29,13 @@ export class Streamer {
         this.isLoading = false;
     }
 
-    start(): Readable {
+    public start(): Readable {
         this.isLoading = true;
-        let video = ytdl(this.song.url, ['--format=best'], null);
-        video.on('info', (info) => {
+        const video = ytdl(this.song.url, ['--format=best'], null);
+        video.on('info', (_): void => {
             this.logger.info(`Start downloading video: ${this.song.title}`);
         });
-        video.on('end', () => {
+        video.on('end', (): void => {
             this.logger.info(`Finish downloading song: ${this.song.title}`);
         });
         video.pipe(this.transferStream);
@@ -43,14 +45,14 @@ export class Streamer {
             .noVideo()
             .audioCodec('libmp3lame')
             .outputFormat('mp3')
-            .on('error', (err) => {
+            .on('error', (err): void => {
                 this.logger.error(`FFmpeg error: ${err}`);
             })
             .pipe(this.output);
         return this.output;
     }
 
-    getOutputStream(): Readable {
+    public getOutputStream(): Readable {
         return this.output;
     }
 }

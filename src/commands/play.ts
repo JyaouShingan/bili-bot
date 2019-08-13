@@ -6,11 +6,11 @@ import {getInfo} from "../utils/utils";
 import {BilibiliSong} from "../bilibili-song";
 
 export class PlayCommand extends BaseCommand {
-    type(): CommandType {
+    public type(): CommandType {
         return CommandType.PLAY;
     }
 
-    async run(message: Message, guild: GuildManager, args?: string[]): Promise<void> {
+    public async run(message: Message, guild: GuildManager, args?: string[]): Promise<void> {
         guild.checkMemberInChannel(message.member);
         if (args.length === 0) {
             throw this.helpMessage();
@@ -21,7 +21,7 @@ export class PlayCommand extends BaseCommand {
         await guild.playSong(message, song);
     }
 
-    helpMessage(): string {
+    public helpMessage(): string {
         return 'Usage: play [video_url]'
     }
 }
