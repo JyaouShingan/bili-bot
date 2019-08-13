@@ -3,7 +3,6 @@ import {Logger, getLogger} from "./logger";
 import {GuildManager} from "./guild";
 
 
-
 export class DiscordBot {
     private readonly token: string;
     private logger: Logger;
@@ -14,7 +13,6 @@ export class DiscordBot {
         this.logger = getLogger('DiscordBot');
         this.token = token;
         this.client = new Client();
-        this.token = token;
         this.guilds = new Map<string, GuildManager>();
     }
 
