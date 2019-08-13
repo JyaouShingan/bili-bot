@@ -29,9 +29,9 @@ export class SelectCommand extends BaseCommand {
             throw CommandException.UserPresentable(`The index you entered is out of bounds, please enter a number between ${1} and ${searchBase.length}`);
         }
         guild.previousCommand = null;
-        const info = await getInfo(searchBase[index].getUrl())
+        const info = await getInfo(searchBase[index].getUrl());
         const song = BilibiliSong.withInfo(info, message.author);
-        guild.playSong(message, song);
+        await guild.playSong(message, song);
     }
 
     helpMessage(): string {

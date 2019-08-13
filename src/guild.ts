@@ -48,11 +48,15 @@ export class GuildManager {
 
     // HELPER FUNCTIONS
 
+    async joinChannel(message: Message) {
+        this.activeConnection = await message.member.voice.channel.join()
+    }
+
     clearPlaylist() {
         while(this.playlist.length > 0) this.playlist.pop();
     }
 
-    playSong(msg: Message, song: BilibiliSong) {
+    async playSong(msg: Message, song: BilibiliSong) {
         // Add to play list
         song.streamer.start();
         this.playlist.push(song);
@@ -63,10 +67,8 @@ export class GuildManager {
                 .setDescription(`${song.title} is added to playlist, current number of songs in the list: ${this.playlist.length}`);
             this.activeTextChannel.send(embed);
         } else if (!this.activeConnection) {
-            msg.member.voice.channel.join().then((connection) => {
-                this.activeConnection = connection;
-                this.playNext();
-            })
+            await this.joinChannel(msg);
+            this.playNext();
         } else {
             this.playNext();
         }
@@ -75,6 +77,7 @@ export class GuildManager {
     playNext() {
         this.isPlaying = true;
         const currentSong = this.playlist.shift();
+        if (!currentSong.streamer.isLoading) currentSong.streamer.start();
         this.currentSong = currentSong;
         this.logger.info(`Start playing song ${currentSong.title}`);
         this.printPlaying(currentSong);

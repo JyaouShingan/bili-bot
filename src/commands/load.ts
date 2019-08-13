@@ -4,7 +4,7 @@ import {GuildManager} from "../guild";
 import {Message} from "discord.js";
 import * as fs from "fs";
 import {BilibiliSong} from "../bilibili-song";
-import {getInfo} from "../utils/utils";
+import {getInfo, shuffle} from "../utils/utils";
 
 export class LoadCommand extends BaseCommand {
     type(): CommandType {
@@ -15,10 +15,10 @@ export class LoadCommand extends BaseCommand {
         guild.checkMemberInChannel(message.member);
         if (args.length === 0) {
             this.logger.info('Loading from default list');
-            await this.load(message, guild);
+            await LoadCommand.load(message, guild);
         } else if (args.length === 1) {
             this.logger.info(`Loading from ${args[0]}`);
-            await this.load(message, guild, args[0]);
+            await LoadCommand.load(message, guild, args[0]);
         } else {
             throw CommandException.UserPresentable('Too many arguments, expected argument: 1');
         }
@@ -28,8 +28,10 @@ export class LoadCommand extends BaseCommand {
         return 'Usage: load <list-name>';
     }
 
-    private async load(message: Message, guild: GuildManager, collection?: string) {
+    private static async load(message: Message, guild: GuildManager, collection?: string) {
         const songs = await guild.datasource.loadFromPlaylist(message.author, collection);
+        shuffle(songs);
+
         for (const song of songs) {
             song.streamer.start();
             guild.playlist.push(song);
@@ -43,10 +45,8 @@ export class LoadCommand extends BaseCommand {
         message.reply('Playlist successfully loaded');
 
         if (!guild.activeConnection) {
-            message.member.voice.channel.join().then((connection) => {
-                guild.activeConnection = connection;
-                guild.playNext();
-            })
+            await guild.joinChannel(message);
+            guild.playNext();
         } else {
             if (!guild.isPlaying) {
                 guild.playNext();
