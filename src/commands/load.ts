@@ -62,8 +62,9 @@ export class LoadCommand extends BaseCommand {
         collection?: string,
     ): Promise<void> {
         const result = await getInfoWithArg(youtubeListUrl, ['--flat-playlist']);
-        message.reply("Start loading from youtube playlist, please be patient...");
         if (Array.isArray(result)) {
+            message.reply("Start loading from youtube playlist, please be patient...");
+            // doing this sync'ly now, might change later
             for (const song of result) {
                 this.logger.info(`Now loading song: ${song.url}`);
                 if (!song.url) continue;
