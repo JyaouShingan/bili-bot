@@ -56,12 +56,12 @@ export class LoadCommand extends BaseCommand {
     }
 
     private async loadYoutubeList(
-        message: Message, 
-        guild: GuildManager, 
+        message: Message,
+        guild: GuildManager,
         youtubeListUrl: string,
         collection?: string,
     ): Promise<void> {
-        const result = await getInfoWithArg(youtubeListUrl, ['--flat-playlist']);
+        const result = await getInfoWithArg(youtubeListUrl, ['--flat-playlist', '-i']);
         if (Array.isArray(result)) {
             message.reply("Start loading from youtube playlist, please be patient...");
             // doing this sync'ly now, might change later
