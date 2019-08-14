@@ -3,6 +3,9 @@ import * as youtubedl from "youtube-dl";
 
 export const getInfo = Promise.promisify(youtubedl.getInfo);
 
+export const getInfoWithArg = Promise.promisify(
+    (url: string, arg: string[], cb: any) => youtubedl.getInfo(url, arg, cb));
+
 export const uidExtractor = (url: string): string => {
     if (url.match(/bilibili/)) {
         return url.match(/av[0-9]*/)[0];
