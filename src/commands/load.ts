@@ -68,10 +68,15 @@ export class LoadCommand extends BaseCommand {
             for (const song of result) {
                 this.logger.info(`Now loading song: ${song.url}`);
                 if (!song.url) continue;
-                const info = await getInfo(song.url);
-                await guild.datasource.saveToPlaylist(
-                    BilibiliSong.withInfo(info, message.author), message.author, collection
-                );
+                try {
+                    const info = await getInfoWithArg(song.url, ['-i']);
+                    await guild.datasource.saveToPlaylist(
+                        BilibiliSong.withInfo(info, message.author), message.author, collection
+                    );
+                } catch (err) {
+                    // Skip duplicated error on batch load
+                    this.logger.warn(err.toString());
+                }
             }
             message.reply("Successfully loaded youtube playlist");
         } else {
