@@ -14,10 +14,18 @@ export class LoadCommand extends BaseCommand {
         guild.checkMemberInChannel(message.member);
         if (args.length === 0) {
             this.logger.info('Loading from default list');
-            await LoadCommand.load(message, guild);
+            await this.load(message, guild);
         } else if (args.length === 1) {
-            this.logger.info(`Loading from ${args[0]}`);
-            await LoadCommand.load(message, guild, args[0]);
+            if (args[0] == '-s') {
+                this.logger.info(`Loading from default synchronously`);
+                await this.load(message, guild, args[0]);
+            } else {
+                this.logger.info(`Loading from ${args[0]}`);
+                await this.load(message, guild, args[0]);
+            }
+        } else if (args.length === 2 && args[0] == '-s') {
+            this.logger.info(`Loading from ${args[1]}`);
+            await this.load(message, guild, args[1], true);
         } else if (args.length === 3 && args[0] == '-y') {
             this.logger.info('Loading from youtube playlist');
             await this.loadYoutubeList(message, guild, args[1], args[2]);
@@ -30,13 +38,20 @@ export class LoadCommand extends BaseCommand {
         return 'Usage: load [-y <youtube-list-url>] <list-name>';
     }
 
-    private static async load(message: Message, guild: GuildManager, collection?: string): Promise<void> {
+    private async load(message: Message, guild: GuildManager, collection?: string, isSync: boolean = false): Promise<void> {
         const songs = await guild.datasource.loadFromPlaylist(message.author, collection);
         shuffle(songs);
 
-        for (const song of songs) {
-            song.streamer.start();
-            guild.playlist.push(song);
+        if (isSync || (songs.length > 5)) {
+            this.logger.info("Sync mode");
+            for (const song of songs) {
+                guild.playlist.push(song);
+            }
+        } else {
+            for (const song of songs) {
+                song.streamer.start();
+                guild.playlist.push(song);
+            }
         }
 
         if (songs.length === 0) {
