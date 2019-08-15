@@ -1,8 +1,8 @@
-import {Logger, getLogger} from "./logger";
-import {BilibiliSong} from "./bilibili-song";
+import {Logger, getLogger} from "./utils/logger";
+import {BilibiliSong} from "./data/model/bilibili-song";
 import {GuildMember, Message, MessageEmbed, StreamDispatcher, TextChannel, VoiceConnection} from "discord.js";
-import {SearchSongEntity} from "./bilibili-api";
-import {CommandEngine} from "./command-engine";
+import {SearchSongEntity} from "./data/bilibili-api";
+import {CommandEngine} from "./commands/command-engine";
 import {CommandException} from "./commands/base-command";
 import {GuildDataSource} from "./data/guild-datasource";
 

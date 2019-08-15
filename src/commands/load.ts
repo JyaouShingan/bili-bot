@@ -2,8 +2,8 @@ import {BaseCommand, CommandException} from "./base-command";
 import {CommandType} from "./command-type";
 import {GuildManager} from "../guild";
 import {Message} from "discord.js";
-import {getInfo, getInfoWithArg, shuffle} from "../utils/utils";
-import { BilibiliSong } from "../bilibili-song";
+import {getInfoWithArg, shuffle} from "../utils/utils";
+import {BilibiliSong} from "../data/model/bilibili-song";
 
 export class LoadCommand extends BaseCommand {
     public type(): CommandType {

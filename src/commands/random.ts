@@ -2,8 +2,8 @@ import {BaseCommand} from "./base-command";
 import {CommandType} from "./command-type";
 import {GuildManager} from "../guild";
 import {Message, MessageEmbed} from "discord.js";
-import * as api from "../bilibili-api";
-import {BilibiliSong} from "../bilibili-song";
+import * as api from "../data/bilibili-api";
+import {BilibiliSong} from "../data/model/bilibili-song";
 import {getInfo} from "../utils/utils";
 
 export class RandomCommand extends BaseCommand {

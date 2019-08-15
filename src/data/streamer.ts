@@ -1,7 +1,7 @@
 import {PassThrough, Readable} from 'stream';
 import * as ytdl from 'youtube-dl';
-import {BilibiliSong} from "./bilibili-song";
-import {Logger, getLogger} from "./logger";
+import {BilibiliSong} from "./model/bilibili-song";
+import {Logger, getLogger} from "../utils/logger";
 import * as Ffmpeg from "fluent-ffmpeg";
 
 class PassStream extends PassThrough {

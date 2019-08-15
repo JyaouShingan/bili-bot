@@ -1,4 +1,4 @@
-import {Logger, getLogger} from "../../logger";
+import {Logger, getLogger} from "../../utils/logger";
 import * as config from "../../../botconfig.json";
 import {connect, Connection, Mongoose} from "mongoose";
 

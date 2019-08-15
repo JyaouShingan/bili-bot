@@ -3,7 +3,7 @@ import {CommandType} from "./command-type";
 import {GuildManager} from "../guild";
 import {Message} from "discord.js";
 import {getInfo} from "../utils/utils";
-import {BilibiliSong} from "../bilibili-song";
+import {BilibiliSong} from "../data/model/bilibili-song";
 
 export class PlayCommand extends BaseCommand {
     public type(): CommandType {

@@ -2,7 +2,7 @@ import {BaseCommand, CommandException} from "./base-command";
 import {CommandType} from "./command-type";
 import {GuildManager} from "../guild";
 import {Message, MessageEmbed} from "discord.js";
-import * as api from "../bilibili-api";
+import * as api from "../data/bilibili-api";
 
 export class SearchCommand extends BaseCommand {
     public type(): CommandType {

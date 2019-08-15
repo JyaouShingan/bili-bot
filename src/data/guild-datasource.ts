@@ -1,11 +1,12 @@
 import {GuildManager} from "../guild";
 import MongoDB from "./db/service";
-import {getLogger, Logger} from "../logger";
-import {BilibiliSong} from "../bilibili-song";
+import {getLogger, Logger} from "../utils/logger";
+import {BilibiliSong} from "./model/bilibili-song";
 import {CommandException} from "../commands/base-command";
 import {User} from "discord.js";
 import {Connection, Model} from "mongoose";
-import {PlaylistDoc, SongDoc, PlaylistSchema, SongSchema} from "./db/schema";
+import {SongDoc, SongSchema} from "./db/schemas/song";
+import {PlaylistDoc, PlaylistSchema} from "./db/schemas/playlist";
 
 export class GuildDataSource {
     protected readonly logger: Logger;

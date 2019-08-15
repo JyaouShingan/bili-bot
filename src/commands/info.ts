@@ -2,7 +2,7 @@ import {BaseCommand, CommandException} from "./base-command";
 import {CommandType} from "./command-type";
 import {Message, MessageEmbed} from "discord.js";
 import {GuildManager} from "../guild";
-import {BilibiliSong} from "../bilibili-song";
+import {BilibiliSong} from "../data/model/bilibili-song";
 import * as utils from "../utils/utils";
 
 export class InfoCommand extends BaseCommand {

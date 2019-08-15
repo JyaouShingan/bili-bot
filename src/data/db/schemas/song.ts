@@ -1,5 +1,5 @@
 import {Document, Schema} from "mongoose";
-import {BilibiliSong} from "../../bilibili-song";
+import {BilibiliSong} from "../../model/bilibili-song";
 import {User} from "discord.js";
 
 const songSchema = new Schema({
@@ -17,17 +17,6 @@ songSchema.method('toSong', function (initiator: User): BilibiliSong {
     return BilibiliSong.withRecord(this, initiator)
 });
 
-const playlistSchema = new Schema({
-    name: {type: String, required: true, unique: true},
-    creator: {type: String, required: true},
-    songs: {
-        type: [
-            {type: Schema.Types.ObjectId, ref: 'Song'}
-        ],
-        required: true
-    }
-});
-
 export interface SongDoc extends Document {
     uid: string;
     url: string;
@@ -39,12 +28,4 @@ export interface SongDoc extends Document {
     thumbnail: string|null;
     toSong(initiator: User): BilibiliSong;
 }
-
-export interface PlaylistDoc extends Document {
-    name: string;
-    creator: string;
-    songs: Schema.Types.ObjectId[];
-}
-
 export const SongSchema = songSchema;
-export const PlaylistSchema = playlistSchema;

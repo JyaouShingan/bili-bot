@@ -1,5 +1,5 @@
 import {Client, Message} from 'discord.js';
-import {Logger, getLogger} from "./logger";
+import {Logger, getLogger} from "./utils/logger";
 import {GuildManager} from "./guild";
 
 

@@ -1,6 +1,6 @@
 import {DiscordBot} from "./discord-bot";
 import * as config from "../botconfig.json";
-import {getLogger} from "./logger";
+import {getLogger} from "./utils/logger";
 import MongoDB from "./data/db/service";
 
 const logger = getLogger("app.js");
