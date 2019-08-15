@@ -11,6 +11,9 @@ tmp
 # Configuration file
 botconfig.json
 
+# Deployment script
+deploy.sh
+
 # Typescript build
 built/
 
