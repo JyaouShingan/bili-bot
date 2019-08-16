@@ -1,7 +1,7 @@
 import {Info} from "youtube-dl";
 import {User} from "discord.js";
-import {Streamer} from "./streamer";
-import {uidExtractor} from "./utils/utils";
+import {Streamer} from "../streamer";
+import {uidExtractor} from "../../utils/utils";
 
 export class BilibiliSong {
     public readonly url: string;

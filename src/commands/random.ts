@@ -2,8 +2,8 @@ import {BaseCommand} from "./base-command";
 import {CommandType} from "./command-type";
 import {GuildManager} from "../guild";
 import {Message, MessageEmbed} from "discord.js";
-import * as api from "../bilibili-api";
-import {BilibiliSong} from "../bilibili-song";
+import * as api from "../data/datasources/bilibili-api";
+import {BilibiliSong} from "../data/model/bilibili-song";
 import {getInfo} from "../utils/utils";
 
 export class RandomCommand extends BaseCommand {
@@ -36,7 +36,7 @@ export class RandomCommand extends BaseCommand {
     }
 
     private static async doLocalRandom(message: Message, guild: GuildManager, playlist?: string): Promise<BilibiliSong> {
-        const songs = await guild.datasource.loadFromPlaylist(message.author, playlist);
+        const songs = await guild.dataManager.loadFromPlaylist(message.author, playlist);
 
         if (playlist) {
             message.reply(`Random selecting from ${playlist}`);

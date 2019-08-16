@@ -5,7 +5,8 @@ import {Info} from "youtube-dl";
 export const getInfo = Promise.promisify(youtubedl.getInfo);
 
 export const getInfoWithArg = Promise.promisify(
-    (url: string, arg: string[], cb: (err: Error, info: Info) => void) => youtubedl.getInfo(url, arg, cb));
+    (url: string, arg: string[], cb: (err: Error, info: Info) => void): void => youtubedl.getInfo(url, arg, cb)
+);
 
 export const uidExtractor = (url: string): string => {
     if (url.match(/bilibili/)) {

@@ -1,4 +1,4 @@
-import {Logger, getLogger} from "../logger";
+import {Logger, getLogger} from "../utils/logger";
 import {Message} from "discord.js";
 import {GuildManager} from "../guild";
 import {CommandType} from "./command-type";

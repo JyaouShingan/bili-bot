@@ -1,14 +1,15 @@
-import {Logger, getLogger} from "./logger";
-import {BilibiliSong} from "./bilibili-song";
-import {GuildMember, Message, MessageEmbed, StreamDispatcher, TextChannel, VoiceConnection} from "discord.js";
-import {SearchSongEntity} from "./bilibili-api";
-import {CommandEngine} from "./command-engine";
+import {Logger, getLogger} from "./utils/logger";
+import {BilibiliSong} from "./data/model/bilibili-song";
+import {Guild, GuildMember, Message, MessageEmbed, StreamDispatcher, TextChannel, VoiceConnection} from "discord.js";
+import {SearchSongEntity} from "./data/datasources/bilibili-api";
+import {CommandEngine} from "./commands/command-engine";
 import {CommandException} from "./commands/base-command";
-import {GuildDataSource} from "./data/guild-datasource";
+import {GuildDataManager} from "./data/managers/guild-data-manager";
 
 export class GuildManager {
     protected readonly logger: Logger;
     public readonly id: string;
+    public readonly guild: Guild;
     public isPlaying: boolean;
     public activeConnection: VoiceConnection;
     public activeTextChannel: TextChannel;
@@ -19,12 +20,13 @@ export class GuildManager {
     public currentShowlistResult: BilibiliSong[];
     public commandPrefix: string;
     protected readonly commandEngine: CommandEngine;
-    public readonly datasource: GuildDataSource;
+    public readonly dataManager: GuildDataManager;
     public previousCommand: null | "search" | "showlist";
 
-    public constructor(id: string, prefix: string = '~') {
-        this.logger = getLogger(`GuildManager-${id}`);
-        this.id = id;
+    public constructor(guild: Guild, prefix: string = '~') {
+        this.logger = getLogger(`GuildManager-${guild.id}`);
+        this.id = guild.id;
+        this.guild = guild;
         this.isPlaying = false;
         this.playlist = [];
         this.currentShowlistResult = [];
@@ -32,17 +34,17 @@ export class GuildManager {
         this.currentSong = null;
         this.commandPrefix = prefix;
         this.commandEngine = new CommandEngine(this);
-        this.datasource = new GuildDataSource(this);
+        this.dataManager = new GuildDataManager(this);
     }
 
-    public processMessage(msg: Message): void {
+    public async processMessage(msg: Message): Promise<void> {
         if (msg.content.startsWith(this.commandPrefix)) {
             this.logger.info(`Processing command: ${msg.content}`);
             const command = msg.content.slice(this.commandPrefix.length);
             const args = command.split(/\s+/);
             if (args.length < 1) return;
             this.activeTextChannel = msg.channel as TextChannel;
-            this.commandEngine.process(msg, args);
+            await this.commandEngine.process(msg, args);
         }
     }
 

@@ -1,12 +1,21 @@
-import {Logger, getLogger} from "../../logger";
+import {Logger, getLogger} from "../../utils/logger";
 import * as config from "../../../botconfig.json";
-import {connect, Connection, Mongoose} from "mongoose";
+import {connect, Model, Mongoose} from "mongoose";
+import {SongDoc, SongSchema} from "./schemas/song";
+import {GuildDoc, GuildSchema} from "./schemas/guild";
+import {PlaylistDoc, PlaylistSchema} from "./schemas/playlist";
 
 class MongoDBService {
     private readonly uri: string;
+    private readonly dbName: string;
 
     protected readonly logger: Logger;
     private client: Mongoose;
+
+    // Models
+    public Guild: Model<GuildDoc>;
+    public Song: Model<SongDoc>;
+    public Playlist: Model<PlaylistDoc>;
 
     public constructor() {
         this.logger = getLogger('MongoDB');
@@ -14,12 +23,17 @@ class MongoDBService {
             this.logger.error(`Missing botconfig.json or "mongoUri" in json`);
         }
         this.uri = config['mongoUri'];
+        this.dbName = config['databaseName'] || 'bili-bot'
     }
 
     public async start(): Promise<boolean> {
         try {
-            this.client = await connect(`${this.uri}/default`, {useNewUrlParser: true});
+            this.client = await connect(`${this.uri}/${this.dbName}`, {useNewUrlParser: true});
             this.logger.info('Connected to default');
+
+            this.Guild = this.client.model('Guild', GuildSchema);
+            this.Song = this.client.model('Song', SongSchema);
+            this.Playlist = this.client.model('Playlist', PlaylistSchema);
             return true
         } catch (error) {
             this.logger.error(`MongoDB connection error: ${error}`);
@@ -27,14 +41,8 @@ class MongoDBService {
         }
     }
 
-    public async getConnection(database: string): Promise<Connection> {
-        const existConnection = this.client.connections.find((conn): boolean => {
-            return conn.db.databaseName == database;
-        });
-        if (existConnection) return existConnection;
-        const connection = await this.client.createConnection(`${this.uri}/${database}`, {useNewUrlParser: true});
-        this.logger.info(`Connected to guild database ${database}`);
-        return connection;
+    public isConnected(): boolean {
+        return this.client.connection.readyState === 1;
     }
 }
 

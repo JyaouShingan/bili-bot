@@ -1,6 +1,7 @@
 import {Client, Message} from 'discord.js';
-import {Logger, getLogger} from "./logger";
+import {Logger, getLogger} from "./utils/logger";
 import {GuildManager} from "./guild";
+import {GuildDataSource} from "./data/datasources/guild-datasource";
 
 
 export class DiscordBot {
@@ -18,24 +19,33 @@ export class DiscordBot {
 
     public run(): void {
         this.client.login(this.token);
-        this.client.on('ready', (): void => {
-            this.clientReady()
-        });
-        this.client.on('message', (msg): void => {
-            this.handleMessage(msg)
+        this.client.on('ready', async (): Promise<void> => {
+            await this.clientReady();
+            this.client.on('message', async (msg): Promise<void> => {
+                await this.handleMessage(msg)
+            });
         });
     }
 
-    private clientReady(): void {
+    private async clientReady(): Promise<void> {
         this.logger.info(`BiliBot logged in as ${this.client.user.username}`);
+        const guildDocs = await GuildDataSource.getInstance().load();
+        for(const guildDoc of guildDocs) {
+            const guild = this.client.guilds.get(guildDoc.uid);
+            if (guild) {
+                this.guilds.set(guild.id, new GuildManager(guild, guildDoc.commandPrefix));
+            }
+        }
     }
 
-    private handleMessage(msg: Message): void {
+    private async handleMessage(msg: Message): Promise<void> {
         if (!msg.guild) return;
         const guildId = msg.guild.id;
         if (!this.guilds.has(guildId)) {
-            this.guilds.set(guildId, new GuildManager(guildId));
+            const newManager = new GuildManager(msg.guild);
+            this.guilds.set(guildId, newManager);
+            await GuildDataSource.getInstance().insert(newManager);
         }
-        this.guilds.get(guildId).processMessage(msg);
+        await this.guilds.get(guildId).processMessage(msg);
     }
 }
