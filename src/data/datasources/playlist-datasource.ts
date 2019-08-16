@@ -26,7 +26,7 @@ export class PlaylistDataSource {
         return MongoDB.Playlist.findOne({name, guildId});
     }
 
-    public async create(name: string, guildId: string, creator: string): Promise<PlaylistDoc> {
+    private async create(name: string, guildId: string, creator: string): Promise<PlaylistDoc> {
         this.logger.verbose(`Playlist ${name} created in ${guildId}`);
         const result = await new MongoDB.Playlist({
             name,
