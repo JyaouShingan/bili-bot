@@ -39,7 +39,7 @@ export class LoadCommand extends BaseCommand {
     }
 
     private async load(message: Message, guild: GuildManager, collection?: string, isSync: boolean = false): Promise<void> {
-        const songs = await guild.datasource.loadFromPlaylist(message.author, collection);
+        const songs = await guild.dataManager.loadFromPlaylist(message.author, collection);
         shuffle(songs);
 
         if (isSync || (songs.length > 5)) {
@@ -85,7 +85,7 @@ export class LoadCommand extends BaseCommand {
                 if (!song.url) continue;
                 try {
                     const info = await getInfoWithArg(song.url, ['-i']);
-                    await guild.datasource.saveToPlaylist(
+                    await guild.dataManager.saveToPlaylist(
                         BilibiliSong.withInfo(info, message.author), message.author, collection
                     );
                 } catch (err) {

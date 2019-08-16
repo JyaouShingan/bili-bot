@@ -12,7 +12,7 @@ export class ShowlistCommand extends BaseCommand {
         guild.checkMemberInChannel(message.member);
         const playlist = args[0] || 'default';
 
-        const songs = await guild.datasource.loadFromPlaylist(message.author, playlist);
+        const songs = await guild.dataManager.loadFromPlaylist(message.author, playlist);
 
         while (guild.currentShowlistResult.length > 0) guild.currentShowlistResult.pop();
         if (songs.length === 0) {

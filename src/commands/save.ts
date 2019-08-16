@@ -33,7 +33,7 @@ export class SaveCommand extends BaseCommand {
             return;
         }
 
-        await guild.datasource.saveToPlaylist(guild.currentSong, user, collection);
+        await guild.dataManager.saveToPlaylist(guild.currentSong, user, collection);
 
         const playlistDescription = collection ? `playlist "${collection}"` : `default playlist`;
         guild.activeTextChannel.send(new MessageEmbed().setDescription(`${guild.currentSong.title} saved to ${playlistDescription}`));

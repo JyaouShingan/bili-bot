@@ -1,6 +1,6 @@
-import {getLogger} from '../utils/logger';
+import {getLogger} from '../../utils/logger';
 import * as request from "request-promise";
-import RandomMapping from '../const/random-mapping';
+import RandomMapping from '../../const/random-mapping';
 
 const logger = getLogger('BilibiliApi');
 const apiBaseUrl = "https://api.imjad.cn/bilibili/v2";
