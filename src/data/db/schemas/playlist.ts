@@ -1,7 +1,7 @@
 import {Document, Schema} from "mongoose";
 
 const playlistSchema = new Schema({
-    name: {type: String, required: true, unique: true},
+    name: {type: String, required: true},
     creator: {type: String, required: true},
     songs: {
         type: [
@@ -11,6 +11,8 @@ const playlistSchema = new Schema({
     },
     guildId: {type: String, required: true, ref: 'Guild'}
 });
+
+playlistSchema.index({name: 1, guildId: 1}, {unique: true});
 
 
 export interface PlaylistDoc extends Document {
