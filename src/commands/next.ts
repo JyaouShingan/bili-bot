@@ -10,13 +10,10 @@ export class NextCommand extends BaseCommand {
 
     public async run(message: Message, guild: GuildManager, _args?: string[]): Promise<void> {
         guild.checkMemberInChannel(message.member);
-        if (guild.playlist.length === 0) {
+        if (guild.queueManager.listIsEmpty()) {
             throw CommandException.UserPresentable('Current playlist is empty');
         } else {
-            if (guild.activeDispatcher) {
-                guild.activeDispatcher.destroy();
-            }
-            guild.playNext();
+            guild.queueManager.next();
         }
     }
 

@@ -11,8 +11,8 @@ export class ShuffleCommand extends BaseCommand {
 
     public async run(message: Message, guild: GuildManager, _args?: string[]): Promise<void> {
         guild.checkMemberInChannel(message.member);
-        if (!guild.isPlaying) return;
-        shuffle(guild.playlist);
+        if (!guild.queueManager.isPlaying) return;
+        guild.queueManager.shuffle();
         message.channel.send(new MessageEmbed().setDescription('Playlist shuffled'));
     }
 

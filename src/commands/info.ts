@@ -21,7 +21,7 @@ export class InfoCommand extends BaseCommand {
     }
 
     private processResult(message: Message, guild: GuildManager, song?: BilibiliSong): void {
-        const currentSong = song || guild.currentSong;
+        const currentSong = song || guild.queueManager.currentSong;
         if (!currentSong) {
             throw CommandException.UserPresentable('Invalid command');
         }

@@ -10,8 +10,7 @@ export class ResumeCommand extends BaseCommand {
 
     public async run(message: Message, guild: GuildManager, _args?: string[]): Promise<void> {
         guild.checkMemberInChannel(message.member);
-        if (guild.activeDispatcher) {
-            guild.activeDispatcher.resume();
+        if (guild.queueManager.resume()) {
             message.reply('Audio resumed!');
         }
     }

@@ -16,16 +16,8 @@ export class LoadCommand extends BaseCommand {
             this.logger.info('Loading from default list');
             await this.load(message, guild);
         } else if (args.length === 1) {
-            if (args[0] == '-s') {
-                this.logger.info(`Loading from default synchronously`);
-                await this.load(message, guild, args[0]);
-            } else {
-                this.logger.info(`Loading from ${args[0]}`);
-                await this.load(message, guild, args[0]);
-            }
-        } else if (args.length === 2 && args[0] == '-s') {
-            this.logger.info(`Loading from ${args[1]}`);
-            await this.load(message, guild, args[1], true);
+            this.logger.info(`Loading from ${args[0]}`);
+            await this.load(message, guild, args[0]);
         } else if (args.length === 3 && args[0] == '-y') {
             this.logger.info('Loading from youtube playlist');
             await this.loadYoutubeList(message, guild, args[1], args[2]);
@@ -38,36 +30,22 @@ export class LoadCommand extends BaseCommand {
         return 'Usage: load [-y <youtube-list-url>] <list-name>';
     }
 
-    private async load(message: Message, guild: GuildManager, collection?: string, isSync: boolean = false): Promise<void> {
+    private async load(message: Message, guild: GuildManager, collection?: string): Promise<void> {
         const songs = await guild.dataManager.loadFromPlaylist(message.author, collection);
-        shuffle(songs);
-
-        if (isSync || (songs.length > 5)) {
-            this.logger.info("Sync mode");
-            for (const song of songs) {
-                guild.playlist.push(song);
-            }
-        } else {
-            for (const song of songs) {
-                song.streamer.start();
-                guild.playlist.push(song);
-            }
-        }
 
         if (songs.length === 0) {
             message.reply('Playlist is empty');
             return;
         }
-        message.reply('Playlist successfully loaded');
 
-        if (!guild.activeConnection) {
+        if (!guild.queueManager.activeConnection) {
             await guild.joinChannel(message);
-            guild.playNext();
-        } else {
-            if (!guild.isPlaying) {
-                guild.playNext();
-            }
         }
+        shuffle(songs);
+        for (const song of songs) {
+            guild.queueManager.pushSong(song);
+        }
+        message.reply('Playlist successfully loaded');
     }
 
     private async loadYoutubeList(

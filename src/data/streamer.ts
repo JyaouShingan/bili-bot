@@ -1,8 +1,9 @@
 import {PassThrough, Readable} from 'stream';
-import * as ytdl from 'youtube-dl';
 import {BilibiliSong} from "./model/bilibili-song";
 import {Logger, getLogger} from "../utils/logger";
 import * as Ffmpeg from "fluent-ffmpeg";
+import * as ytdl from "youtube-dl";
+import {EventEmitter} from "events";
 
 class PassStream extends PassThrough {
     public close(): void {}
@@ -10,16 +11,18 @@ class PassStream extends PassThrough {
     public bytesWritten: number;
 }
 
-export class Streamer {
+export class Streamer extends EventEmitter {
     protected song: BilibiliSong;
     protected logger: Logger;
+    protected videoStream: Readable;
     protected ffmpegCommand: Ffmpeg.FfmpegCommand;
     protected output: PassThrough;
     protected transferStream: PassStream;
     public isLoading: boolean;
 
     public constructor(song: BilibiliSong) {
-        const bufferSize = 10 * 1024 * 1024; // 10 mb
+        super();
+        const bufferSize =  1024 * 1024; // 1 mb
 
         this.song = song;
         this.logger = getLogger("Streamer");
@@ -31,14 +34,14 @@ export class Streamer {
 
     public start(): Readable {
         this.isLoading = true;
-        const video = ytdl(this.song.url, ['--format=best'], null);
-        video.on('info', (_): void => {
+        this.videoStream = ytdl(this.song.url, ['--format=best'], null) as Readable;
+        this.videoStream.on('info', (_): void => {
             this.logger.info(`Start downloading video: ${this.song.title}`);
         });
-        video.on('end', (): void => {
+        this.videoStream.on('end', (): void => {
             this.logger.info(`Finish downloading song: ${this.song.title}`);
         });
-        video.pipe(this.transferStream);
+        this.videoStream.pipe(this.transferStream);
 
         this.ffmpegCommand
             .input(this.transferStream)
@@ -48,8 +51,17 @@ export class Streamer {
             .on('error', (err): void => {
                 this.logger.error(`FFmpeg error: ${err}`);
             })
+            .on('end', (): void => {
+                this.logger.info('FFmpeg transcode complete');
+                this.emit('finish');
+            })
             .pipe(this.output);
         return this.output;
+    }
+
+    public stop(): void {
+        this.videoStream.destroy();
+        this.output.destroy();
     }
 
     public getOutputStream(): Readable {

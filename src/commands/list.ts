@@ -10,12 +10,12 @@ export class ListCommand extends BaseCommand {
 
     public async run(message: Message, guild: GuildManager, _args?: string[]): Promise<void> {
         guild.checkMemberInChannel(message.member);
-        if (guild.playlist.length === 0) {
+        if (guild.queueManager.listIsEmpty()) {
             const embed = new MessageEmbed()
                 .setDescription(`Pending playlist is empty`);
             guild.activeTextChannel.send(embed);
         } else {
-            const playlistMessage = guild.playlist.map((song, index): string => {
+            const playlistMessage = guild.queueManager.playlist.map((song, index): string => {
                 return `${index + 1}. ${song.title} [${song.initiator.toString()}]`;
             }).join('\n');
             const embed = new MessageEmbed()

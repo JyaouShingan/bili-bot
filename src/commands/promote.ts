@@ -20,12 +20,7 @@ export class PromoteCommand extends BaseCommand {
         }
         index -= 1;
 
-        if (index < 0 || index >= guild.playlist.length) {
-            throw CommandException.UserPresentable(`The index you entered is out of bounds, please enter a number between ${1} and ${guild.playlist.length}`);
-        }
-
-        const song = guild.playlist.splice(index)[0];
-        guild.playlist.unshift(song);
+        const song = guild.queueManager.promoteSong(index);
 
         const embed = new MessageEmbed()
             .setDescription(`${song.title} has been promoted to top of the playlist`);

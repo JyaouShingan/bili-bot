@@ -10,12 +10,10 @@ export class LeaveCommand extends BaseCommand {
 
     public async run(message: Message, guild: GuildManager, _args?: string[]): Promise<void> {
         guild.checkMemberInChannel(message.member);
-        if (!guild.activeConnection) return;
-        guild.activeConnection.disconnect();
-        guild.activeConnection = null;
-        guild.activeDispatcher = null;
-        guild.isPlaying = false;
-        guild.clearPlaylist();
+        if (!guild.queueManager.activeConnection) return;
+        guild.queueManager.stop();
+        guild.queueManager.activeConnection.disconnect();
+        guild.queueManager.activeConnection = null;
     }
 
     public helpMessage(): string {
