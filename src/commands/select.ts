@@ -31,7 +31,9 @@ export class SelectCommand extends BaseCommand {
         guild.previousCommand = null;
         const info = await getInfo(searchBase[index].getUrl());
         const song = BilibiliSong.withInfo(info, message.author);
-        await guild.playSong(message, song);
+
+        await guild.joinChannel(message);
+        guild.queueManager.pushSong(song);
     }
 
     public helpMessage(): string {

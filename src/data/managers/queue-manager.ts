@@ -3,6 +3,8 @@ import {BilibiliSong} from "../model/bilibili-song";
 import {getLogger, Logger} from "../../utils/logger";
 import {StreamDispatcher, VoiceConnection} from "discord.js";
 import {CommandException} from "../../commands/base-command";
+import {shuffle} from "../../utils/utils";
+import {StreamerState} from "../streamer";
 
 export class QueueManager {
     protected readonly logger: Logger;
@@ -33,10 +35,12 @@ export class QueueManager {
     public pushSong(song: BilibiliSong): void {
         this.playlist.push(song);
         this.logger.info(`Song ${song.title} added to the queue`);
-        if (this.loadingList.size < this.threshold) {
-            this.startLoading(song);
-        } else {
-            this.waitingList.push(song);
+        if (song.streamer.state === StreamerState.UNLOADED) {
+            if (this.loadingList.size < this.threshold) {
+                this.startLoading(song);
+            } else {
+                this.waitingList.push(song);
+            }
         }
         if (!this.isPlaying) {
             this.playNext();
@@ -45,12 +49,30 @@ export class QueueManager {
         }
     }
 
-    public removeSong(song: BilibiliSong): void {
-
+    public pushSongs(songs: BilibiliSong[]): void {
+        this.logger.info(`${songs.length} songs added to the queue`);
+        for (const song of songs) {
+            this.playlist.push(song);
+            if (song.streamer.state === StreamerState.UNLOADED) {
+                if (this.loadingList.size < this.threshold) {
+                    this.startLoading(song);
+                } else {
+                    this.waitingList.push(song);
+                }
+            }
+        }
+        if (!this.isPlaying) {
+            this.playNext();
+        }
     }
 
     public clear(): void {
-
+        while (this.playlist.length !== 0) this.playlist.pop();
+        while (this.waitingList.length !== 0) this.waitingList.pop();
+        this.loadingList.forEach((song: BilibiliSong): void => {
+            song.streamer.stop();
+        });
+        this.loadingList.clear();
     }
 
     public promoteSong(index: number): BilibiliSong {
@@ -61,13 +83,21 @@ export class QueueManager {
         const song = this.playlist.splice(index)[0];
         this.playlist.unshift(song);
 
-        // TODO: Loading list
+        if (song.streamer.state === StreamerState.UNLOADED) {
+            this.startLoading(song);
+        }
 
         return song;
     }
 
-    public shuffle(): void {
-        // TODO: Shuffle
+    public doShuffle(): void {
+        shuffle(this.playlist);
+        while (this.waitingList.length !== 0) this.waitingList.pop();
+        for (const song of this.playlist) {
+            if (song.streamer.state === StreamerState.UNLOADED) {
+                this.waitingList.push(song);
+            }
+        }
     }
 
     public pause(): boolean {
@@ -96,23 +126,34 @@ export class QueueManager {
     }
 
     public next(): void {
+        const current = this.currentSong;
+        if (this.loadingList.has(current)) {
+            current.streamer.stop();
+            this.loadingList.delete(current);
+            if (this.loadingList.size < this.threshold && this.waitingList.length !== 0) {
+                const song = this.waitingList.shift();
+                this.startLoading(song);
+            }
+        }
+        current.streamer.destroy();
         this.playNext();
-
     }
 
     private startLoading(song: BilibiliSong): void {
+        this.logger.info(`Start loading ${song.title}`);
         song.streamer.start();
-        song.streamer.on('finish', () => {
+        song.streamer.on('finish', (): void => {
             this.finishLoading(song);
         });
         this.loadingList.add(song);
     }
 
     private finishLoading(song: BilibiliSong): void {
+        this.logger.info(`Finished loading ${song.title}`);
         this.loadingList.delete(song);
-        if (this.waitingList.length !== 0) {
-            const song = this.waitingList.shift();
-            this.startLoading(song);
+        if (this.loadingList.size < this.threshold && this.waitingList.length !== 0) {
+            const nextSong = this.waitingList.shift();
+            this.startLoading(nextSong);
         }
     }
 
@@ -123,6 +164,7 @@ export class QueueManager {
         this.activeDispatcher = this.activeConnection.play(song.streamer.getOutputStream());
         this.activeDispatcher.setVolume(0.2);
         this.activeDispatcher.on('finish', (): void => {
+            song.streamer.destroy();
             this.playNext();
         });
     }

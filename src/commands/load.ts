@@ -42,9 +42,7 @@ export class LoadCommand extends BaseCommand {
             await guild.joinChannel(message);
         }
         shuffle(songs);
-        for (const song of songs) {
-            guild.queueManager.pushSong(song);
-        }
+        guild.queueManager.pushSongs(songs);
         message.reply('Playlist successfully loaded');
     }
 

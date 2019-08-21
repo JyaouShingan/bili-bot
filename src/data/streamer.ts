@@ -11,6 +11,13 @@ class PassStream extends PassThrough {
     public bytesWritten: number;
 }
 
+export enum StreamerState {
+    UNLOADED,
+    LOADING,
+    LOADED,
+    CACHED
+}
+
 export class Streamer extends EventEmitter {
     protected song: BilibiliSong;
     protected logger: Logger;
@@ -18,28 +25,35 @@ export class Streamer extends EventEmitter {
     protected ffmpegCommand: Ffmpeg.FfmpegCommand;
     protected output: PassThrough;
     protected transferStream: PassStream;
-    public isLoading: boolean;
+    public state: StreamerState;
 
     public constructor(song: BilibiliSong) {
         super();
-        const bufferSize =  1024 * 1024; // 1 mb
+        const bufferSize =  10 * 1024 * 1024; // 10 mb
 
         this.song = song;
         this.logger = getLogger("Streamer");
         this.ffmpegCommand = Ffmpeg();
         this.output = new PassThrough({highWaterMark: bufferSize});
         this.transferStream = new PassStream({highWaterMark: bufferSize});
-        this.isLoading = false;
+        this.state = StreamerState.UNLOADED;
     }
 
     public start(): Readable {
-        this.isLoading = true;
+        if (this.state !== StreamerState.UNLOADED) {
+            return this.output;
+        }
+        this.state = StreamerState.LOADING;
         this.videoStream = ytdl(this.song.url, ['--format=best'], null) as Readable;
         this.videoStream.on('info', (_): void => {
-            this.logger.info(`Start downloading video: ${this.song.title}`);
+            this.logger.verbose(`Start downloading video: ${this.song.title}`);
         });
         this.videoStream.on('end', (): void => {
-            this.logger.info(`Finish downloading song: ${this.song.title}`);
+            this.logger.verbose(`Finish downloading song: ${this.song.title}`);
+        });
+        this.videoStream.on('error', (error): void => {
+            this.logger.error(`YoutubeDL failed: ${error}`);
+            this.state = StreamerState.UNLOADED;
         });
         this.videoStream.pipe(this.transferStream);
 
@@ -52,16 +66,24 @@ export class Streamer extends EventEmitter {
                 this.logger.error(`FFmpeg error: ${err}`);
             })
             .on('end', (): void => {
-                this.logger.info('FFmpeg transcode complete');
+                this.logger.verbose('FFmpeg transcode complete');
+                this.state = StreamerState.LOADED;
                 this.emit('finish');
             })
             .pipe(this.output);
         return this.output;
     }
 
-    public stop(): void {
+    public destroy(): void {
         this.videoStream.destroy();
         this.output.destroy();
+        this.removeAllListeners();
+    }
+
+    public stop(): void {
+        this.state = StreamerState.UNLOADED;
+        this.logger.info('Destroying streamer');
+        this.destroy();
     }
 
     public getOutputStream(): Readable {

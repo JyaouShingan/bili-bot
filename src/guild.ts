@@ -1,6 +1,6 @@
 import {Logger, getLogger} from "./utils/logger";
 import {BilibiliSong} from "./data/model/bilibili-song";
-import {Guild, GuildMember, Message, MessageEmbed, StreamDispatcher, TextChannel, VoiceConnection} from "discord.js";
+import {Guild, GuildMember, Message, MessageEmbed, TextChannel} from "discord.js";
 import {SearchSongEntity} from "./data/datasources/bilibili-api";
 import {CommandEngine} from "./commands/command-engine";
 import {CommandException} from "./commands/base-command";
@@ -47,18 +47,6 @@ export class GuildManager {
 
     public async joinChannel(message: Message): Promise<void> {
         this.queueManager.activeConnection = await message.member.voice.channel.join();
-    }
-
-    public async playSong(msg: Message, song: BilibiliSong): Promise<void> {
-        // Check connection
-        if (!this.queueManager.activeConnection) {
-            await this.joinChannel(msg);
-        }
-        this.queueManager.pushSong(song);
-    }
-
-    public playNext(): void {
-        this.queueManager.next();
     }
 
     public setPreviousCommand(command: null | "search" | "showlist"): void {

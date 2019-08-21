@@ -8,6 +8,9 @@
 *.mp3
 tmp
 
+# Cache
+cache/
+
 # Configuration file
 botconfig.json
 
