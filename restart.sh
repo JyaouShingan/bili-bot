@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 echo "Shutting down current running process"
 screen -S bilibot -X quit
@@ -20,4 +20,4 @@ then
 fi
 
 echo "Starting screen session"
-screen -S bilibot -d -m sh -c "npm start | tee logs/${START_DATE}.log"
+screen -S bilibot -d -m bash -c "npm start | tee logs/${START_DATE}.log"
