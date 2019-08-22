@@ -28,14 +28,14 @@ export class SaveCommand extends BaseCommand {
     }
 
     private async save(guild: GuildManager, user: User, collection?: string): Promise<void> {
-        if (!guild.currentSong) {
+        if (!guild.queueManager.currentSong) {
             this.logger.warn('No song is playing');
             return;
         }
 
-        await guild.dataManager.saveToPlaylist(guild.currentSong, user, collection);
+        await guild.dataManager.saveToPlaylist(guild.queueManager.currentSong, user, collection);
 
         const playlistDescription = collection ? `playlist "${collection}"` : `default playlist`;
-        guild.activeTextChannel.send(new MessageEmbed().setDescription(`${guild.currentSong.title} saved to ${playlistDescription}`));
+        guild.activeTextChannel.send(new MessageEmbed().setDescription(`${guild.queueManager.currentSong.title} saved to ${playlistDescription}`));
     }
 }

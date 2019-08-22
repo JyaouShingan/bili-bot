@@ -1,21 +1,18 @@
 import {Logger, getLogger} from "./utils/logger";
 import {BilibiliSong} from "./data/model/bilibili-song";
-import {Guild, GuildMember, Message, MessageEmbed, StreamDispatcher, TextChannel, VoiceConnection} from "discord.js";
+import {Guild, GuildMember, Message, MessageEmbed, TextChannel} from "discord.js";
 import {SearchSongEntity} from "./data/datasources/bilibili-api";
 import {CommandEngine} from "./commands/command-engine";
 import {CommandException} from "./commands/base-command";
 import {GuildDataManager} from "./data/managers/guild-data-manager";
+import {QueueManager} from "./data/managers/queue-manager";
 
 export class GuildManager {
     protected readonly logger: Logger;
     public readonly id: string;
     public readonly guild: Guild;
-    public isPlaying: boolean;
-    public activeConnection: VoiceConnection;
+    public readonly queueManager: QueueManager;
     public activeTextChannel: TextChannel;
-    public activeDispatcher: StreamDispatcher;
-    public playlist: BilibiliSong[];
-    public currentSong?: BilibiliSong;
     public currentSearchResult?: SearchSongEntity[];
     public currentShowlistResult: BilibiliSong[];
     public commandPrefix: string;
@@ -27,11 +24,9 @@ export class GuildManager {
         this.logger = getLogger(`GuildManager-${guild.id}`);
         this.id = guild.id;
         this.guild = guild;
-        this.isPlaying = false;
-        this.playlist = [];
+        this.queueManager = new QueueManager(this);
         this.currentShowlistResult = [];
         this.previousCommand = null;
-        this.currentSong = null;
         this.commandPrefix = prefix;
         this.commandEngine = new CommandEngine(this);
         this.dataManager = new GuildDataManager(this);
@@ -51,52 +46,7 @@ export class GuildManager {
     // HELPER FUNCTIONS
 
     public async joinChannel(message: Message): Promise<void> {
-        this.activeConnection = await message.member.voice.channel.join()
-    }
-
-    public clearPlaylist(): void {
-        while(this.playlist.length > 0) this.playlist.pop();
-    }
-
-    public async playSong(msg: Message, song: BilibiliSong): Promise<void> {
-        // Add to play list
-        song.streamer.start();
-        this.playlist.push(song);
-
-        if (this.isPlaying) {
-            this.logger.info(`Song ${song.title} added to the queue`);
-            const embed = new MessageEmbed()
-                .setDescription(`${song.title} is added to playlist, current number of songs in the list: ${this.playlist.length}`);
-            this.activeTextChannel.send(embed);
-        } else if (!this.activeConnection) {
-            await this.joinChannel(msg);
-            this.playNext();
-        } else {
-            this.playNext();
-        }
-    }
-
-    public playNext(): void {
-        this.isPlaying = true;
-        const currentSong = this.playlist.shift();
-        if (!currentSong.streamer.isLoading) currentSong.streamer.start();
-        this.currentSong = currentSong;
-        this.logger.info(`Start playing song ${currentSong.title}`);
-        this.printPlaying(currentSong);
-        const dispatcher = this.activeConnection.play(currentSong.streamer.getOutputStream());
-        this.activeDispatcher = dispatcher;
-        dispatcher.setVolume(0.1);
-        dispatcher.on('finish', (): void => {
-            dispatcher.destroy();
-            if (this.playlist.length === 0) {
-                this.isPlaying = false;
-                this.activeDispatcher = null;
-                this.activeTextChannel.send("Running out of songs");
-            } else {
-                this.logger.info("Playing next song");
-                this.playNext();
-            }
-        });
+        this.queueManager.activeConnection = await message.member.voice.channel.join();
     }
 
     public setPreviousCommand(command: null | "search" | "showlist"): void {
@@ -118,10 +68,20 @@ export class GuildManager {
         this.activeTextChannel.send(embed);
     }
 
+    public printOutOfSongs(): void {
+        this.activeTextChannel.send(new MessageEmbed().setDescription("Running out of songs"));
+    }
+
+    public printAddToQueue(song: BilibiliSong, queueLength: number): void {
+        const embed = new MessageEmbed()
+            .setDescription(`${song.title} is added to playlist, current number of songs in the list: ${queueLength}`);
+        this.activeTextChannel.send(embed);
+    }
+
     public checkMemberInChannel(member: GuildMember): void {
         if (!member.voice || !member.voice.channel) {
             throw CommandException.UserPresentable('You are not in a voice channel');
-        } else if (this.activeConnection && member.voice.channel.id != this.activeConnection.channel.id) {
+        } else if (this.queueManager.activeConnection && member.voice.channel.id != this.queueManager.activeConnection.channel.id) {
             throw (CommandException.UserPresentable("You cannot use this command if you are not in the channel I'm playing"));
         } else {
             return;

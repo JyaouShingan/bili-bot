@@ -10,14 +10,10 @@ export class StopCommand extends BaseCommand {
 
     public async run(message: Message, guild: GuildManager, _args?: string[]): Promise<void> {
         guild.checkMemberInChannel(message.member);
-        if (!guild.isPlaying) {
+        if (!guild.queueManager.isPlaying) {
             throw CommandException.UserPresentable("I'm not currently playing");
         } else {
-            guild.isPlaying = false;
-            if (guild.activeDispatcher) {
-                guild.activeDispatcher.destroy();
-            }
-            guild.currentSong = null;
+            guild.queueManager.stop();
         }
     }
 

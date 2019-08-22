@@ -32,7 +32,8 @@ export class RandomCommand extends BaseCommand {
         } else {
             song = await RandomCommand.doLocalRandom(message, guild);
         }
-        await guild.playSong(message, song);
+        await guild.joinChannel(message);
+        guild.queueManager.pushSong(song);
     }
 
     private static async doLocalRandom(message: Message, guild: GuildManager, playlist?: string): Promise<BilibiliSong> {
