@@ -10,7 +10,7 @@ export class ListCommand extends BaseCommand {
 
     public async run(message: Message, guild: GuildManager, _args?: string[]): Promise<void> {
         guild.checkMemberInChannel(message.member);
-        if (guild.queueManager.listIsEmpty()) {
+        if (guild.queueManager.isListEmpty()) {
             const embed = new MessageEmbed()
                 .setDescription(`Pending playlist is empty`);
             guild.activeTextChannel.send(embed);

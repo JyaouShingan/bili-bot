@@ -28,7 +28,7 @@ export class QueueManager {
         this.threshold = threshold;
     }
 
-    public listIsEmpty(): boolean {
+    public isListEmpty(): boolean {
         return this.playlist.length === 0;
     }
 
@@ -80,7 +80,7 @@ export class QueueManager {
             throw CommandException.UserPresentable(`The index you entered is out of bounds, please enter a number between ${1} and ${this.playlist.length}`);
         }
 
-        const song = this.playlist.splice(index)[0];
+        const song = this.playlist.splice(index, 1)[0];
         this.playlist.unshift(song);
 
         if (song.streamer.state === StreamerState.UNLOADED) {
