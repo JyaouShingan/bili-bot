@@ -19,7 +19,7 @@ export class DiscordBot {
 
     public run(): void {
         this.client.login(this.token);
-        this.client.on('ready', async (): Promise<void> => {
+        this.client.once('ready', async (): Promise<void> => {
             await this.clientReady();
             this.client.on('message', async (msg): Promise<void> => {
                 await this.handleMessage(msg)
