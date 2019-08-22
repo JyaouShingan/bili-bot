@@ -12,5 +12,12 @@ git pull origin master
 echo "Updating dependencies"
 npm install
 
+START_DATE=`date +%F-%H-%M-%S`
+
+if [[ ! -d "./logs" ]]
+then
+    mkdir "logs"
+fi
+
 echo "Starting screen session"
-screen -S bilibot -d -m npm start
+screen -S bilibot -d -m sh -c "npm start | tee logs/${START_DATE}.log"
