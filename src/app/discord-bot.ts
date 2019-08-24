@@ -1,7 +1,7 @@
 import {Client, Message} from 'discord.js';
-import {Logger, getLogger} from "./utils/logger";
+import {Logger, getLogger} from "../utils/logger";
 import {GuildManager} from "./guild";
-import {GuildDataSource} from "./data/datasources/guild-datasource";
+import {GuildDataSource} from "../data/datasources/guild-datasource";
 
 
 export class DiscordBot {

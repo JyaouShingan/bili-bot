@@ -1,6 +1,6 @@
 import {BaseCommand, CommandException} from "./base-command";
 import {CommandType} from "./command-type";
-import {GuildManager} from "../guild";
+import {GuildManager} from "../app/guild";
 import {Message, MessageEmbed} from "discord.js";
 
 export class PromoteCommand extends BaseCommand {

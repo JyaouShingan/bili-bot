@@ -1,4 +1,4 @@
-import {GuildManager} from "../../guild";
+import {GuildManager} from "../../app/guild";
 import {BilibiliSong} from "../model/bilibili-song";
 import {getLogger, Logger} from "../../utils/logger";
 import {StreamDispatcher, VoiceConnection} from "discord.js";

@@ -1,7 +1,7 @@
 import {BaseCommand, CommandException} from "./base-command";
 import {CommandType} from "./command-type";
 import {Message, MessageEmbed} from "discord.js";
-import {GuildManager} from "../guild";
+import {GuildManager} from "../app/guild";
 import {BilibiliSong} from "../data/model/bilibili-song";
 import * as utils from "../utils/utils";
 

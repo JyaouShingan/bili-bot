@@ -13,6 +13,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@google-cloud/storage": "^3.2.0",
     "@types/bluebird": "^3.5.27",
     "@types/fluent-ffmpeg": "^2.1.10",
     "@types/mongoose": "^5.5.12",
