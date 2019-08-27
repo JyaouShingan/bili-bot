@@ -62,7 +62,7 @@ export class LoadCommand extends BaseCommand {
                 try {
                     const info = await getInfoWithArg(song.url, ['-i']);
                     await guild.dataManager.saveToPlaylist(
-                        BilibiliSong.withInfo(info, message.author), message.author, collection
+                        await BilibiliSong.withInfo(info, message.author), message.author, collection
                     );
                 } catch (err) {
                     // Skip duplicated error on batch load

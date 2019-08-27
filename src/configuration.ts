@@ -20,6 +20,7 @@ class Configuration {
     // Optional
     private mongoDatabaseName?: string;
     private googleCloudAccountKeyFile?: string;
+    private localCacheDirectory: string;
 
     private constructor() {
         this.logger = getLogger('Configuration');
@@ -50,6 +51,7 @@ class Configuration {
         // Optionals
         this.mongoDatabaseName = config['databaseName'] || null;
         this.googleCloudAccountKeyFile = config['gcloudKeyFile'] || null;
+        this.localCacheDirectory = config['localCacheDirectory'] || 'cache';
 
         return true;
     }
@@ -72,6 +74,10 @@ class Configuration {
 
     public getGoogleKeyFile(): string | null {
         return this.googleCloudAccountKeyFile;
+    }
+
+    public getLocalCacheDirectory(): string {
+        return this.localCacheDirectory;
     }
 }
 

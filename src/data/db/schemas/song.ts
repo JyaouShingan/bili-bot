@@ -10,7 +10,8 @@ const songSchema = new Schema({
     hmsDuration: {type: String, required: true},
     rawDuration: {type: Number, required: true},
     description: String,
-    thumbnail: String
+    thumbnail: String,
+    cached: Boolean
 });
 
 songSchema.method('toSong', function (initiator: User): BilibiliSong {
@@ -26,6 +27,7 @@ export interface SongDoc extends Document {
     rawDuration: number;
     description: string|null;
     thumbnail: string|null;
+    cached: boolean|null;
     toSong(initiator: User): BilibiliSong;
 }
 export const SongSchema = songSchema;

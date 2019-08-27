@@ -1,6 +1,8 @@
 import {getLogger, Logger} from "../../utils/logger";
 import Config from "../../configuration";
 import {Bucket, Storage} from "@google-cloud/storage";
+import * as fs from "fs";
+import {Readable} from "stream";
 
 export class GoogleCloudDataSource {
     private static instance: GoogleCloudDataSource;
@@ -38,5 +40,22 @@ export class GoogleCloudDataSource {
             this.logger.error(`GCloud cache setup error: ${error}`);
             return false;
         }
+    }
+
+    public async upload(filename: string, filepath: fs.PathLike): Promise<void> {
+        const file = this.bucket.file(filename);
+        const localStream = fs.createReadStream(filepath);
+        const remoteStream = file.createWriteStream({resumable: false});
+        localStream.pipe(remoteStream);
+        return new Promise((resolve, reject): void => {
+            remoteStream.on('finish', (): void => resolve());
+            remoteStream.on('error', reject);
+            localStream.on('error', reject);
+        });
+    }
+
+    public getReadStream(filename: string): Readable {
+        const file = this.bucket.file(filename);
+        return file.createReadStream();
     }
 }

@@ -62,4 +62,21 @@ export class SongDataSource {
             return song.save();
         }
     }
+
+    public async setCached(uid: string, cached: boolean): Promise<void> {
+        this.logger.verbose(`Setting cache state of song ${uid} to ${cached}`);
+        await MongoDB.Song.updateOne(
+            {
+                uid
+            }, {
+                $set: {"cached": cached}
+            }
+        );
+    }
+
+    public async isCached(uid: string): Promise<boolean> {
+        this.logger.verbose(`Checking cache state of song ${uid}`);
+        const songDoc = await MongoDB.Song.findOne({uid});
+        return songDoc.cached || false;
+    }
 }

@@ -164,6 +164,7 @@ export class QueueManager {
         this.activeDispatcher = this.activeConnection.play(song.streamer.getOutputStream());
         this.activeDispatcher.setVolume(0.2);
         this.activeDispatcher.on('finish', (): void => {
+            this.loadingList.delete(song);
             song.streamer.destroy();
             this.playNext();
         });

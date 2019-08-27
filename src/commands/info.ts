@@ -16,7 +16,7 @@ export class InfoCommand extends BaseCommand {
             this.processResult(message, guild, null);
         } else {
             const info = await utils.getInfo(args.shift());
-            this.processResult(message, guild, BilibiliSong.withInfo(info, message.author));
+            this.processResult(message, guild, await BilibiliSong.withInfo(info, message.author));
         }
     }
 

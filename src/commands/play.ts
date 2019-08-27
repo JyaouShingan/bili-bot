@@ -16,7 +16,7 @@ export class PlayCommand extends BaseCommand {
             throw this.helpMessage();
         }
         const info = await getInfo(args.shift());
-        const song = BilibiliSong.withInfo(info, message.author);
+        const song = await BilibiliSong.withInfo(info, message.author);
         this.logger.info(`Playing: ${song.title}`);
 
         await guild.joinChannel(message);

@@ -42,7 +42,7 @@ export class GuildDataSource {
             {
                 uid: guildManager
             }, {
-                commandPrefix: guildManager.commandPrefix
+                $set: {"commandPrefix": guildManager.commandPrefix}
             }
         );
     }
