@@ -11,6 +11,9 @@ tmp
 # Cache
 cache/
 
+# Credential
+cred/
+
 # Configuration file
 botconfig.json
 
