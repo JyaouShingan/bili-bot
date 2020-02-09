@@ -49,7 +49,7 @@ export class Streamer extends EventEmitter {
             this.state = StreamerState.CACHED;
             const sourceStream = GoogleCloudDataSource.getInstance().getReadStream(this.cacheName());
             sourceStream.on('end', (): void => {
-                this.logger.info(`Cached loaded - ${this.song.title}`);
+                this.logger.info(`Cache loaded - ${this.song.title}`);
             });
             sourceStream.pipe(this.output);
             return this.output;
