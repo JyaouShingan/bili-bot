@@ -27,13 +27,13 @@
     "discord.js": "github:discordjs/discord.js",
     "exit-hook": "^2.2.0",
     "fluent-ffmpeg": "^2.1.2",
-    "mongoose": "^5.6.9",
+    "mongoose": "^5.7.5",
     "node-opus": "^0.3.2",
     "request": "^2.88.0",
     "request-promise": "^4.2.4",
     "typescript": "^3.5.3",
     "winston": "^3.2.1",
-    "youtube-dl": "^2.0.0"
+    "youtube-dl": "^2.3.0"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^1.13.0",
