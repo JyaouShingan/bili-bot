@@ -1,6 +1,6 @@
 import {Logger, getLogger} from "../utils/logger";
 import {Message} from "discord.js";
-import {GuildManager} from "../guild";
+import {GuildManager} from "../app/guild";
 import {CommandType} from "./command-type";
 
 export interface Command {

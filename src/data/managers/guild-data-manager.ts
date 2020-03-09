@@ -1,4 +1,4 @@
-import {GuildManager} from "../../guild";
+import {GuildManager} from "../../app/guild";
 import {getLogger, Logger} from "../../utils/logger";
 import {BilibiliSong} from "../model/bilibili-song";
 import {CommandException} from "../../commands/base-command";

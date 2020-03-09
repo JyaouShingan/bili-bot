@@ -1,11 +1,11 @@
-import {Logger, getLogger} from "./utils/logger";
-import {BilibiliSong} from "./data/model/bilibili-song";
+import {Logger, getLogger} from "../utils/logger";
+import {BilibiliSong} from "../data/model/bilibili-song";
 import {Guild, GuildMember, Message, MessageEmbed, TextChannel} from "discord.js";
-import {SearchSongEntity} from "./data/datasources/bilibili-api";
-import {CommandEngine} from "./commands/command-engine";
-import {CommandException} from "./commands/base-command";
-import {GuildDataManager} from "./data/managers/guild-data-manager";
-import {QueueManager} from "./data/managers/queue-manager";
+import {SearchSongEntity} from "../data/datasources/bilibili-api";
+import {CommandEngine} from "../commands/command-engine";
+import {CommandException} from "../commands/base-command";
+import {GuildDataManager} from "../data/managers/guild-data-manager";
+import {QueueManager} from "../data/managers/queue-manager";
 
 export class GuildManager {
     protected readonly logger: Logger;

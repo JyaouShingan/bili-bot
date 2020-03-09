@@ -1,4 +1,4 @@
-import {GuildManager} from "../../guild";
+import {GuildManager} from "../../app/guild";
 import {BilibiliSong} from "../model/bilibili-song";
 import {getLogger, Logger} from "../../utils/logger";
 import {StreamDispatcher, VoiceConnection} from "discord.js";
@@ -164,6 +164,7 @@ export class QueueManager {
         this.activeDispatcher = this.activeConnection.play(song.streamer.getOutputStream());
         this.activeDispatcher.setVolume(0.2);
         this.activeDispatcher.on('finish', (): void => {
+            this.loadingList.delete(song);
             song.streamer.destroy();
             this.playNext();
         });

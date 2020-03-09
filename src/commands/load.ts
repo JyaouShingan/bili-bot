@@ -1,6 +1,6 @@
 import {BaseCommand, CommandException} from "./base-command";
 import {CommandType} from "./command-type";
-import {GuildManager} from "../guild";
+import {GuildManager} from "../app/guild";
 import {Message} from "discord.js";
 import {getInfoWithArg, shuffle} from "../utils/utils";
 import {BilibiliSong} from "../data/model/bilibili-song";
@@ -62,7 +62,7 @@ export class LoadCommand extends BaseCommand {
                 try {
                     const info = await getInfoWithArg(song.url, ['-i']);
                     await guild.dataManager.saveToPlaylist(
-                        BilibiliSong.withInfo(info, message.author), message.author, collection
+                        await BilibiliSong.withInfo(info, message.author), message.author, collection
                     );
                 } catch (err) {
                     // Skip duplicated error on batch load

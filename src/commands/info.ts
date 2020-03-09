@@ -1,7 +1,7 @@
 import {BaseCommand, CommandException} from "./base-command";
 import {CommandType} from "./command-type";
 import {Message, MessageEmbed} from "discord.js";
-import {GuildManager} from "../guild";
+import {GuildManager} from "../app/guild";
 import {BilibiliSong} from "../data/model/bilibili-song";
 import * as utils from "../utils/utils";
 
@@ -16,7 +16,7 @@ export class InfoCommand extends BaseCommand {
             this.processResult(message, guild, null);
         } else {
             const info = await utils.getInfo(args.shift());
-            this.processResult(message, guild, BilibiliSong.withInfo(info, message.author));
+            this.processResult(message, guild, await BilibiliSong.withInfo(info, message.author));
         }
     }
 

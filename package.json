@@ -13,7 +13,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@google-cloud/storage": "^3.2.0",
     "@types/bluebird": "^3.5.27",
+    "@types/exit-hook": "^2.2.1",
     "@types/fluent-ffmpeg": "^2.1.10",
     "@types/mongoose": "^5.5.12",
     "@types/node": "^12.7.0",
@@ -23,6 +25,7 @@
     "@typescript-eslint/parser": "^1.13.0",
     "bluebird": "^3.5.5",
     "discord.js": "github:discordjs/discord.js",
+    "exit-hook": "^2.2.0",
     "fluent-ffmpeg": "^2.1.2",
     "mongoose": "^5.7.5",
     "node-opus": "^0.3.2",

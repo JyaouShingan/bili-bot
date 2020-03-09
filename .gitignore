@@ -17,6 +17,9 @@ cred/
 # Configuration file
 botconfig.json
 
+# Credentials
+cred/
+
 # Deployment script
 deploy.sh
 

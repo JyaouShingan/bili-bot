@@ -1,13 +1,13 @@
 import {Logger, getLogger} from "../../utils/logger";
-import * as config from "../../../botconfig.json";
+import Config from "../../configuration";
 import {connect, Model, Mongoose} from "mongoose";
 import {SongDoc, SongSchema} from "./schemas/song";
 import {GuildDoc, GuildSchema} from "./schemas/guild";
 import {PlaylistDoc, PlaylistSchema} from "./schemas/playlist";
 
 class MongoDBService {
-    private readonly uri: string;
-    private readonly dbName: string;
+    private uri: string;
+    private dbName: string;
 
     protected readonly logger: Logger;
     private client: Mongoose;
@@ -19,15 +19,12 @@ class MongoDBService {
 
     public constructor() {
         this.logger = getLogger('MongoDB');
-        if (!config || !config['mongoUri']) {
-            this.logger.error(`Missing botconfig.json or "mongoUri" in json`);
-        }
-        this.uri = config['mongoUri'];
-        this.dbName = config['databaseName'] || 'bili-bot'
     }
 
     public async start(): Promise<boolean> {
         try {
+            this.uri = Config.getMongoUri();
+            this.dbName = Config.getMongoDatabaseName() || 'bili-bot';
             this.client = await connect(`${this.uri}/${this.dbName}`, {useNewUrlParser: true});
             this.logger.info('Connected to default');
 

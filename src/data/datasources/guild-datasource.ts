@@ -1,7 +1,7 @@
 import MongoDB from "../db/service";
 import {getLogger, Logger} from "../../utils/logger";
 import {GuildDoc} from "../db/schemas/guild";
-import {GuildManager} from "../../guild";
+import {GuildManager} from "../../app/guild";
 
 export class GuildDataSource {
     private static instance: GuildDataSource;
@@ -42,7 +42,7 @@ export class GuildDataSource {
             {
                 uid: guildManager
             }, {
-                commandPrefix: guildManager.commandPrefix
+                $set: {"commandPrefix": guildManager.commandPrefix}
             }
         );
     }

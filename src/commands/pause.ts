@@ -1,7 +1,7 @@
 import {BaseCommand} from "./base-command";
 import {CommandType} from "./command-type";
 import {Message} from "discord.js";
-import {GuildManager} from "../guild";
+import {GuildManager} from "../app/guild";
 
 export class PauseCommand extends BaseCommand {
     public type(): CommandType {

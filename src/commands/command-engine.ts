@@ -1,4 +1,4 @@
-import {GuildManager} from "../guild";
+import {GuildManager} from "../app/guild";
 import {Command, CommandException} from "./base-command";
 import {Commands} from "./commands";
 import {Message} from "discord.js";
